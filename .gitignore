@@ -1,0 +1,8 @@
+*.o
+
+mutate
+hello
+hello_num.c
+hello_del.c
+hello_ins.c
+hello_swp.c
