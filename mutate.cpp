@@ -74,19 +74,16 @@ void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
 void MyRecursiveASTVisitor::SaveStmt(Stmt *s)
 {
   if (counter == stmt_id_1) {
-    llvm::errs() << "saving stmt1:" << stmt_id_1 << "\n";
     stmt_set_1 = true;
     stmt1 = s;
   }
   if (counter == stmt_id_2) {
-    llvm::errs() << "saving stmt2:" << stmt_id_2 << "\n";
     stmt_set_2 = true;
     stmt2 = s;
   }
 }
 
 bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
-  llvm::errs() << counter << " ";
   if (SelectStmt(s)) {
     switch(action) {
     case NUMBER: NumberStmt(s); break;
@@ -168,15 +165,6 @@ MyASTConsumer::MyASTConsumer(const char *f)
       rv.Rewrite.ReplaceText(stmt1->getSourceRange(), rep2);
       rv.Rewrite.ReplaceText(stmt2->getSourceRange(), rep1);
       break;
-    }
-
-    // process saved statements
-    llvm::errs() << "Done parsing:\n";
-    if(stmt_set_1){
-      llvm::errs() << "STMT1 is:\n" << rep1 << "\n";
-    }
-    if(stmt_set_2){
-      llvm::errs() << "STMT2 is:\n" << rep2 << "\n";
     }
 
     // Output file prefix
