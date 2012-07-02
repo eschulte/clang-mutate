@@ -155,13 +155,15 @@ MyASTConsumer::MyASTConsumer(const char *f)
     rv.ci->getDiagnosticClient().EndSourceFile();
 
     // Handle Insertion and Swapping
-    std::string rep1 = rv.Rewrite.getRewrittenText(stmt1->getSourceRange());
-    std::string rep2 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
+    std::string rep1, rep2;
     switch(action){
     case INSERT:
+      rep1 = rv.Rewrite.getRewrittenText(stmt1->getSourceRange());
       rv.Rewrite.InsertText(stmt1->getLocStart(), rep2, true);
       break;
     case SWAP:
+      rep1 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
+      rep2 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
       rv.Rewrite.ReplaceText(stmt1->getSourceRange(), rep2);
       rv.Rewrite.ReplaceText(stmt2->getSourceRange(), rep1);
       break;
