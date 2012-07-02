@@ -53,11 +53,20 @@ bool MyRecursiveASTVisitor::SelectStmt(Stmt *s)
 void MyRecursiveASTVisitor::NumberStmt(Stmt *s)
 {
   char label[24];
+  unsigned EndOff;
+  SourceLocation END = s->getLocEnd();
 
   sprintf(label, "/* %d[ */", counter);
   Rewrite.InsertText(s->getLocStart(), label, false);
   sprintf(label, "/* ]%d */", counter);
-  Rewrite.InsertText(s->getLocEnd(), label, true);
+  
+  // Adjust the end offset to the end of the last token, instead of being the
+  // start of the last token.
+  EndOff = Lexer::MeasureTokenLength(END,
+                                     Rewrite.getSourceMgr(),
+                                     Rewrite.getLangOpts());
+
+  Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
 }
 
 void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
