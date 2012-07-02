@@ -158,11 +158,11 @@ MyASTConsumer::MyASTConsumer(const char *f)
     rv.ci->getDiagnosticClient().EndSourceFile();
 
     // Handle Insertion and Swapping
-    std::string rep1 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
+    std::string rep1 = rv.Rewrite.getRewrittenText(stmt1->getSourceRange());
     std::string rep2 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
     switch(action){
     case INSERT:
-      rv.Rewrite.InsertText(stmt1->getLocStart(), rep1, true);
+      rv.Rewrite.InsertText(stmt1->getLocStart(), rep2, true);
       break;
     case SWAP:
       rv.Rewrite.ReplaceText(stmt1->getSourceRange(), rep2);
@@ -173,14 +173,10 @@ MyASTConsumer::MyASTConsumer(const char *f)
     // process saved statements
     llvm::errs() << "Done parsing:\n";
     if(stmt_set_1){
-      llvm::errs() << "STMT1 is:\n"
-                   << rv.Rewrite.getRewrittenText(stmt1->getSourceRange())
-                   << "\n";
+      llvm::errs() << "STMT1 is:\n" << rep1 << "\n";
     }
     if(stmt_set_2){
-      llvm::errs() << "STMT2 is:\n"
-                   << rv.Rewrite.getRewrittenText(stmt2->getSourceRange())
-                   << "\n";
+      llvm::errs() << "STMT2 is:\n" << rep2 << "\n";
     }
 
     // Output file prefix
