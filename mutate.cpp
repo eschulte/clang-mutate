@@ -1,6 +1,6 @@
 /* mutate.cpp --- Mutate statements in a source file       -*- c++ -*-
  * 
- * Adapted from the very good tutorial at
+ * Adapted from the very good CIrewriter.cpp tutorial in
  * http://github.com/loarabia/Clang-tutorial
  */
 #include <sys/types.h>
@@ -28,7 +28,9 @@ using namespace clang;
 
 enum ACTION { NUMBER, DELETE, INSERT, SWAP };
 
-unsigned int action, stmt1, stmt2;
+Stmt *stmt1, *stmt2;
+bool stmt_set_1, stmt_set_2 = false;
+unsigned int action, stmt_id_1, stmt_id_2;
 unsigned int counter = 0;
 
 class MyRecursiveASTVisitor
@@ -38,9 +40,8 @@ class MyRecursiveASTVisitor
   bool SelectStmt(Stmt *s);
   void NumberStmt(Stmt *s);
   void DeleteStmt(Stmt *s);
-  void InsertStmt(Stmt *s);
-  void SwapStmt(Stmt *s);
-  bool VisitStmt(Stmt *s);
+  void   SaveStmt(Stmt *s);
+  bool  VisitStmt(Stmt *s);
 
   Rewriter Rewrite;
   CompilerInstance *ci;
@@ -55,39 +56,39 @@ void MyRecursiveASTVisitor::NumberStmt(Stmt *s)
   sprintf(label, "/* %d:{ */", counter);
   Rewrite.InsertText(s->getLocStart(), label, true);
   sprintf(label, "/* %d:} */", counter);
-  // maybe use .getLocWithOffset(1) for statements followed by ";" or "}"
+  // TODO: The end is not always aligned correctly, see what logic is
+  //       used by `ReplaceText', as it seem to work better.
+  // TODO: maybe use .getLocWithOffset(1) for statements followed by ";" or "}"
   Rewrite.InsertText(s->getLocEnd(), label, true);
 }
 
 void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
 {
   char label[24];
-  if(counter == stmt1) {
+  if(counter == stmt_id_1) {
     sprintf(label, "/* deleted:%d */", counter);
     Rewrite.ReplaceText(s->getSourceRange(), label);
   }
 }
 
-void MyRecursiveASTVisitor::InsertStmt(Stmt *s)
+void MyRecursiveASTVisitor::SaveStmt(Stmt *s)
 {
-  llvm::errs() << "InsertStmt is not implemented\n";
-  exit(EXIT_FAILURE);
+  if (counter == stmt_id_1) {
+    stmt_set_1 = true;
+    stmt1 = s;
+  } else if (counter == stmt_id_1) {
+    stmt_set_2 = true;
+    stmt2 = s;
+  }
 }
 
-void MyRecursiveASTVisitor::SwapStmt(Stmt *s)
-{
-  llvm::errs() << "SwapStmt is not implemented\n";
-  exit(EXIT_FAILURE);
-}
-
-// Number Statements
 bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
   if (SelectStmt(s)) {
     switch(action) {
     case NUMBER: NumberStmt(s); break;
     case DELETE: DeleteStmt(s); break;
-    case INSERT: InsertStmt(s); break;
-    case SWAP:   SwapStmt(s);   break;
+    case INSERT:
+    case SWAP:     SaveStmt(s); break;
     }
   }
   counter++;
@@ -152,13 +153,26 @@ MyASTConsumer::MyASTConsumer(const char *f)
     ParseAST(rv.ci->getPreprocessor(), this, rv.ci->getASTContext());
     rv.ci->getDiagnosticClient().EndSourceFile();
 
+    // process saved statements
+    llvm::errs() << "Done parsing:\n";
+    if(stmt_set_1){
+      llvm::errs() << "STMT1 is:\n"
+                   << rv.Rewrite.getRewrittenText(stmt1->getSourceRange())
+                   << "\n";
+    }
+    if(stmt_set_2){
+      llvm::errs() << "STMT2 is:\n"
+                   << rv.Rewrite.getRewrittenText(stmt2->getSourceRange())
+                   << "\n";
+    }
+
     // Output file prefix
     outFile << "/* ";
     switch(action){
     case NUMBER: outFile << "numbered"; break;
-    case DELETE: outFile << "deleted "  << stmt1; break;
-    case INSERT: outFile << "copying "  << stmt1 << " to " << stmt2; break;
-    case SWAP:   outFile << "swapping " << stmt1 << " with " << stmt2; break;
+    case DELETE: outFile << "deleted "  << stmt_id_1; break;
+    case INSERT: outFile << "copying "  << stmt_id_1 << " to " << stmt_id_2; break;
+    case SWAP:   outFile << "swapping " << stmt_id_1 << " with " << stmt_id_2; break;
     }
     outFile << " using `mutate.cpp' */\n\n";
 
@@ -204,6 +218,7 @@ int parse_int_from(char *str, int *offset){
   return atoi(buffer);
 }
 
+// TODO: figure out how to include search paths for libraries
 int main(int argc, char *argv[])
 {
   struct stat sb;
@@ -234,19 +249,19 @@ int main(int argc, char *argv[])
 
   if(action != NUMBER) {
     offset=2;
-    stmt1 = parse_int_from(argv[1], &offset);
+    stmt_id_1 = parse_int_from(argv[1], &offset);
     if(action != DELETE) {
-      stmt2 = parse_int_from(argv[1], &offset);
+      stmt_id_2 = parse_int_from(argv[1], &offset);
     }
   }
 
   switch(action){
   case NUMBER: llvm::errs() << "numbering\n"; break;
-  case DELETE: llvm::errs() << "deleting " << stmt1 << "\n"; break;
-  case INSERT: llvm::errs() << "copying "  << stmt1 << " "
-                            << "to "       << stmt2 << "\n"; break;
-  case SWAP:   llvm::errs() << "swapping " << stmt1 << " "
-                            << "with "     << stmt2 << "\n"; break;
+  case DELETE: llvm::errs() << "deleting " << stmt_id_1 << "\n"; break;
+  case INSERT: llvm::errs() << "copying "  << stmt_id_1 << " "
+                            << "to "       << stmt_id_2 << "\n"; break;
+  case SWAP:   llvm::errs() << "swapping " << stmt_id_1 << " "
+                            << "with "     << stmt_id_2 << "\n"; break;
   }
 
   // check the file
