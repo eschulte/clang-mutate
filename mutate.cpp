@@ -53,12 +53,10 @@ bool MyRecursiveASTVisitor::SelectStmt(Stmt *s)
 void MyRecursiveASTVisitor::NumberStmt(Stmt *s)
 {
   char label[24];
-  sprintf(label, "/* %d:{ */", counter);
-  Rewrite.InsertText(s->getLocStart(), label, true);
-  sprintf(label, "/* %d:} */", counter);
-  // TODO: The end is not always aligned correctly, see what logic is
-  //       used by `ReplaceText', as it seem to work better.
-  // TODO: maybe use .getLocWithOffset(1) for statements followed by ";" or "}"
+
+  sprintf(label, "/* %d[ */", counter);
+  Rewrite.InsertText(s->getLocStart(), label, false);
+  sprintf(label, "/* ]%d */", counter);
   Rewrite.InsertText(s->getLocEnd(), label, true);
 }
 
