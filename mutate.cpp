@@ -74,15 +74,19 @@ void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
 void MyRecursiveASTVisitor::SaveStmt(Stmt *s)
 {
   if (counter == stmt_id_1) {
+    llvm::errs() << "saving stmt1:" << stmt_id_1 << "\n";
     stmt_set_1 = true;
     stmt1 = s;
-  } else if (counter == stmt_id_1) {
+  }
+  if (counter == stmt_id_2) {
+    llvm::errs() << "saving stmt2:" << stmt_id_2 << "\n";
     stmt_set_2 = true;
     stmt2 = s;
   }
 }
 
 bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
+  llvm::errs() << counter << " ";
   if (SelectStmt(s)) {
     switch(action) {
     case NUMBER: NumberStmt(s); break;
@@ -143,7 +147,7 @@ MyASTConsumer::MyASTConsumer(const char *f)
   case SWAP:   outName.insert(ext, "_swp"); break;
   }
 
-  llvm::errs() << "Output to: " << outName << "\n";
+  llvm::errs() << "output to: " << outName << "\n";
   std::string OutErrorInfo;
   llvm::raw_fd_ostream outFile(outName.c_str(), OutErrorInfo, 0);
 
@@ -152,6 +156,19 @@ MyASTConsumer::MyASTConsumer(const char *f)
     // Parse the AST
     ParseAST(rv.ci->getPreprocessor(), this, rv.ci->getASTContext());
     rv.ci->getDiagnosticClient().EndSourceFile();
+
+    // Handle Insertion and Swapping
+    std::string rep1 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
+    std::string rep2 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
+    switch(action){
+    case INSERT:
+      rv.Rewrite.InsertText(stmt1->getLocStart(), rep1, true);
+      break;
+    case SWAP:
+      rv.Rewrite.ReplaceText(stmt1->getSourceRange(), rep2);
+      rv.Rewrite.ReplaceText(stmt2->getSourceRange(), rep1);
+      break;
+    }
 
     // process saved statements
     llvm::errs() << "Done parsing:\n";
@@ -171,8 +188,10 @@ MyASTConsumer::MyASTConsumer(const char *f)
     switch(action){
     case NUMBER: outFile << "numbered"; break;
     case DELETE: outFile << "deleted "  << stmt_id_1; break;
-    case INSERT: outFile << "copying "  << stmt_id_1 << " to " << stmt_id_2; break;
-    case SWAP:   outFile << "swapping " << stmt_id_1 << " with " << stmt_id_2; break;
+    case INSERT: outFile << "copying "  << stmt_id_1 << " "
+                         << "to "       << stmt_id_2; break;
+    case SWAP:   outFile << "swapping " << stmt_id_1 << " "
+                         << "with "     << stmt_id_2; break;
     }
     outFile << " using `mutate.cpp' */\n\n";
 
