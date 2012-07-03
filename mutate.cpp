@@ -130,8 +130,9 @@ MyASTConsumer::MyASTConsumer(const char *f)
   rv.ci->getPreprocessorOpts().UsePredefines = false;
 
   // Header paths
-  HeaderSearchOptions head_opts = rv.ci->getHeaderSearchOpts();
-  head_opts.AddPath("/usr/include", frontend::System, true, true, true);
+  InitHeaderSearch init(headers);
+  init.AddDefaultIncludePaths(rv.Rewrite.getLangOpts());
+  init.Realize;
 
   rv.ci->setASTConsumer(this);
 
