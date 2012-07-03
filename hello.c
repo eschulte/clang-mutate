@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <stdio.h> // <- just delete this line for things to work
 
 int do_math(int input)
 {

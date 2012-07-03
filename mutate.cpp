@@ -114,12 +114,9 @@ class MyASTConsumer : public ASTConsumer
     MyRecursiveASTVisitor rv;
 };
 
+// TODO: use Tooling to do all of this stuff.
 MyASTConsumer::MyASTConsumer(const char *f)
 {
-  CompilerInvocation *cInvo = new CompilerInvocation();
-  cInvo->getHeaderSearchOpts().AddPath("/usr/include/",
-                                       frontend::System, true, true, true);
-
   rv.ci = new CompilerInstance();
   rv.ci->createDiagnostics(0,NULL);
 
@@ -134,7 +131,6 @@ MyASTConsumer::MyASTConsumer(const char *f)
   rv.ci->getPreprocessorOpts().UsePredefines = false;
   rv.ci->setASTConsumer(this);
   rv.ci->createASTContext();
-  rv.ci->setInvocation(cInvo);
 
   // Initialize rewriter
   rv.Rewrite.setSourceMgr(rv.ci->getSourceManager(), rv.ci->getLangOpts());
