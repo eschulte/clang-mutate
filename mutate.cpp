@@ -165,11 +165,11 @@ MyASTConsumer::MyASTConsumer(const char *f)
     std::string rep1, rep2;
     switch(action){
     case INSERT:
-      rep1 = rv.Rewrite.getRewrittenText(stmt1->getSourceRange());
+      rep2 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
       rv.Rewrite.InsertText(stmt1->getLocStart(), rep2, true);
       break;
     case SWAP:
-      rep1 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
+      rep1 = rv.Rewrite.getRewrittenText(stmt1->getSourceRange());
       rep2 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
       rv.Rewrite.ReplaceText(stmt1->getSourceRange(), rep2);
       rv.Rewrite.ReplaceText(stmt2->getSourceRange(), rep1);
