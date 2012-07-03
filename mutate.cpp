@@ -140,20 +140,9 @@ MyASTConsumer::MyASTConsumer(const char *f)
                                            &rv.ci->getPreprocessor());
 
   // Header paths
-  HeaderSearchOptions& headeropts = rv.ci.getHeaderSearchOpts();
-  for (unsigned int i=0; i<options.system_includes.size(); i++) {
-    headeropts.AddPath(options.system_includes[i],
-                       clang::frontend::Angled, true, false, false/* true ? */);
-  }
-  for (unsigned int i=0; i<options.user_includes.size(); i++) {
-    headeropts.AddPath(options.user_includes[i],
-                       clang::frontend::Quoted, true, false, false/* true ? */);
-  }
-  ApplyHeaderSearchOptions(PP.getHeaderSearchInfo(),
-                           headeropts,
-                           rv.ci->getLangOpts(),
-                           rv.ci.getTarget().getTriple());
-
+  // TODO: how can I set this up to look in the normal places,
+  //       currently it can't find <stdio.h>.
+  
   // Convert <file>.c to <file_action>.c
   std::string outName (f);
   size_t ext = outName.rfind(".");
