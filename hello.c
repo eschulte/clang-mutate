@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int do_math(int input)
 {
   int a,b;
