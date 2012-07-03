@@ -30,4 +30,4 @@ all: $(OBJECTS) $(EXES)
 	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS)
 
 clean:
-	-rm -f $(EXES) $(OBJECTS) *~
+	-rm -f $(EXES) $(OBJECTS) hello_* *~
