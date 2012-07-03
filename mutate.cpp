@@ -11,10 +11,12 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/HeaderSearchOptions.h"
 #include "clang/Basic/TargetOptions.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Basic/FileManager.h"
 #include "clang/Basic/SourceManager.h"
+#include "clang/Lex/HeaderSearch.h"
 #include "clang/Lex/Preprocessor.h"
 #include "clang/Lex/Lexer.h"
 #include "clang/Basic/Diagnostic.h"
@@ -127,6 +129,10 @@ MyASTConsumer::MyASTConsumer(const char *f)
   rv.ci->createPreprocessor();
   rv.ci->getPreprocessorOpts().UsePredefines = false;
 
+  // Header paths
+  HeaderSearchOptions head_opts = rv.ci->getHeaderSearchOpts();
+  head_opts.AddPath("/usr/include", frontend::System, true, true, true);
+
   rv.ci->setASTConsumer(this);
 
   rv.ci->createASTContext();
@@ -138,10 +144,6 @@ MyASTConsumer::MyASTConsumer(const char *f)
   rv.ci->getSourceManager().createMainFileID(pFile);
   rv.ci->getDiagnosticClient().BeginSourceFile(rv.ci->getLangOpts(),
                                            &rv.ci->getPreprocessor());
-
-  // Header paths
-  // TODO: how can I set this up to look in the normal places,
-  //       currently it can't find <stdio.h>.
   
   // Convert <file>.c to <file_action>.c
   std::string outName (f);
