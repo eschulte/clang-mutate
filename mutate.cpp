@@ -130,8 +130,13 @@ MyASTConsumer::MyASTConsumer(const char *f)
   rv.ci->getPreprocessorOpts().UsePredefines = false;
 
   // Header paths
-  HeaderSearch headers(rv.ci->getFileManager(), rv.ci->getDiagnostics(),
-                       rv.Rewrite.getLangOpts(), pti);
+  InitHeaderSearch init(headers);
+  init.AddDefaultIncludePaths(rv.Rewrite.getLangOpts());
+  init.Realize;
+
+  rv.ci->setASTConsumer(this);
+
+  rv.ci->createASTContext();
 
   // Initialize rewriter
   rv.Rewrite.setSourceMgr(rv.ci->getSourceManager(), rv.ci->getLangOpts());
