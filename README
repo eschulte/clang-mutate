@@ -1,0 +1,30 @@
+Mutate C-family source code files with Clang
+
+Simply running make should build the mutate executable.
+
+The mutate script supports the following operations.
+
+1. Numbering the statement in a source code file
+
+     ./mutate n hello.c
+
+   will result in the creation of a hello_num.c file in which each
+   statement is bracketed with its numerical identifier.
+
+2. Any of these statements may then be deleted, e.g.,
+
+     ./mutate d:2 hello.c
+
+   will result in the creation of a hello_del.c file in which the
+   second statement has been deleted.
+
+3. Any of these statements may be copied back into the file, e.g.,
+
+     ./mutate i:4:7 hello.c
+     less hello_ins.c
+
+4. Similarly two statement may be swapped, e.g. the following swaps
+   two puts statements,
+
+     ./mutate s:28:26 hello.c
+     less hello_swp.c
