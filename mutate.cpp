@@ -116,6 +116,10 @@ class MyASTConsumer : public ASTConsumer
 
 MyASTConsumer::MyASTConsumer(const char *f)
 {
+  CompilerInvocation *cInvo = new CompilerInvocation();
+  cInvo->getHeaderSearchOpts().AddPath("/usr/include/",
+                                       frontend::System, true, true, true);
+
   rv.ci = new CompilerInstance();
   rv.ci->createDiagnostics(0,NULL);
 
@@ -128,14 +132,9 @@ MyASTConsumer::MyASTConsumer(const char *f)
   rv.ci->createSourceManager(rv.ci->getFileManager());
   rv.ci->createPreprocessor();
   rv.ci->getPreprocessorOpts().UsePredefines = false;
-
-  // Header paths
-  HeaderSearchOptions head_opts = rv.ci->getHeaderSearchOpts();
-  head_opts.AddPath("/usr/include", frontend::System, true, true, true);
-
   rv.ci->setASTConsumer(this);
-
   rv.ci->createASTContext();
+  rv.ci->setInvocation(cInvo);
 
   // Initialize rewriter
   rv.Rewrite.setSourceMgr(rv.ci->getSourceManager(), rv.ci->getLangOpts());
