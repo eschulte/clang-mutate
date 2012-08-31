@@ -21,6 +21,13 @@ using namespace clang;
 using namespace clang::tooling;
 using namespace llvm;
 
+enum ACTION { NUMBER, DELETE, INSERT, SWAP };
+
+Stmt *stmt1, *stmt2;
+bool stmt_set_1, stmt_set_2 = false;
+unsigned int action, stmt_id_1, stmt_id_2;
+unsigned int counter = 0;
+
 cl::opt<std::string> BuildPath(
   cl::Positional,
   cl::desc("<build-path>"));
@@ -41,12 +48,53 @@ static cl::extrahelp MoreHelp(
   "             i:#1:#2 - insert statement #1 before statement numbered #2\n"
   "             s:#1:#2 - swap statements #1 and #2\n");
 
-enum ACTION { NUMBER, DELETE, INSERT, SWAP };
+int parse_int_from(std::string str, int *offset){
+  char buffer[12];
+  char c;
+  int i=-1;
+  do {
+    c = str[(*offset)];
+    ++(*offset);
+    ++i;
+  } while((c >= '0') && (c <= '9') && (buffer[i] = c));
+  buffer[i] = '\0';
+  if (i == 0)
+  {
+    llvm::errs() << "(additional) statement number required\n";
+    exit(EXIT_FAILURE);
+  }
+  return atoi(buffer);
+}
 
-Stmt *stmt1, *stmt2;
-bool stmt_set_1, stmt_set_2 = false;
-unsigned int action, stmt_id_1, stmt_id_2;
-unsigned int counter = 0;
+void check_mut_opt(std::string str){
+  int offset;
+
+  // check the action
+  switch(str[0]){
+  case 'n': action=NUMBER; break;
+  case 'd': action=DELETE; break;
+  case 'i': action=INSERT; break;
+  case 's': action=SWAP;   break;
+  default: llvm::report_fatal_error("invalid action specified\n");
+  }
+
+  if(action != NUMBER) {
+    offset=2;
+    stmt_id_1 = parse_int_from(str, &offset);
+    if(action != DELETE) {
+      stmt_id_2 = parse_int_from(str, &offset);
+    }
+  }
+
+  switch(action){
+  case NUMBER: llvm::errs() << "numbering\n"; break;
+  case DELETE: llvm::errs() << "deleting " << stmt_id_1 << "\n"; break;
+  case INSERT: llvm::errs() << "copying "  << stmt_id_1 << " "
+                            << "to "       << stmt_id_2 << "\n"; break;
+  case SWAP:   llvm::errs() << "swapping " << stmt_id_1 << " "
+                            << "with "     << stmt_id_2 << "\n"; break;
+  }
+}
 
 class MutationVisitor
     : public RecursiveASTVisitor<MutationVisitor> {
@@ -148,6 +196,11 @@ int main(int argc, const char **argv) {
   llvm::OwningPtr<CompilationDatabase> Compilations(
     FixedCompilationDatabase::loadFromCommandLine(argc, argv));
   cl::ParseCommandLineOptions(argc, argv);
+
+  // check mutation op
+  check_mut_opt(argv[2]);
+  
+  // check compilation
   if (!Compilations) {
     std::string ErrorMessage;
     Compilations.reset(CompilationDatabase::loadFromDirectory(BuildPath,
