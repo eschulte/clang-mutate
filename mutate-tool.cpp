@@ -28,10 +28,6 @@ bool stmt_set_1, stmt_set_2 = false;
 unsigned int action, stmt_id_1, stmt_id_2;
 unsigned int counter = 0;
 
-cl::opt<std::string> BuildPath(
-  cl::Positional,
-  cl::desc("<build-path>"));
-
 cl::opt<std::string> MutOpt(
   cl::Positional,
   cl::desc("<mut-op>"));
@@ -75,7 +71,7 @@ void check_mut_opt(std::string str){
   case 'd': action=DELETE; break;
   case 'i': action=INSERT; break;
   case 's': action=SWAP;   break;
-  default: llvm::report_fatal_error("invalid action specified\n");
+  default: llvm::report_fatal_error("try ./mutation-tool -help\n");
   }
 
   if(action != NUMBER) {
@@ -110,7 +106,7 @@ class MutationVisitor
 
   Rewriter Rewrite;
   CompilerInstance *ci;
-  
+
  private:
   ASTContext *Context;
 };
@@ -127,7 +123,7 @@ void MutationVisitor::NumberStmt(Stmt *s)
   sprintf(label, "/* %d[ */", counter);
   Rewrite.InsertText(s->getLocStart(), label, false);
   sprintf(label, "/* ]%d */", counter);
-  
+
   // Adjust the end offset to the end of the last token, instead of being the
   // start of the last token.
   EndOff = Lexer::MeasureTokenLength(END,
@@ -198,16 +194,8 @@ int main(int argc, const char **argv) {
   cl::ParseCommandLineOptions(argc, argv);
 
   // check mutation op
-  check_mut_opt(argv[2]);
-  
-  // check compilation
-  if (!Compilations) {
-    std::string ErrorMessage;
-    Compilations.reset(CompilationDatabase::loadFromDirectory(BuildPath,
-                                                              ErrorMessage));
-    if (!Compilations)
-      llvm::report_fatal_error(ErrorMessage);
-  }
+  check_mut_opt(MutOpt);
+
   ClangTool Tool(*Compilations, SourcePaths);
   return Tool.run(newFrontendActionFactory<MutationAction>());
 }
