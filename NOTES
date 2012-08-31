@@ -1,0 +1,6 @@
+# -*- org -*-
+
+* Implement using the LibTooling interface
+The llvm IRC room suggests using a "tooling interface".
+http://clang.llvm.org/docs/LibTooling.html
+
