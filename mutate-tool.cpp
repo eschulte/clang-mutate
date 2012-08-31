@@ -2,19 +2,20 @@
 #include <sys/stat.h>
 #include <stdio.h>
 
-#include "llvm/Support/CommandLine.h"
-#include "clang/Frontend/FrontendActions.h"
-#include "clang/Tooling/CompilationDatabase.h"
-#include "clang/Tooling/Tooling.h"
-
 #include "clang/Lex/Preprocessor.h"
 #include "clang/Lex/Lexer.h"
 #include "clang/Basic/Diagnostic.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/AST/ASTConsumer.h"
 #include "clang/Parse/ParseAST.h"
 #include "clang/Rewrite/Rewriters.h"
 #include "clang/Rewrite/Rewriter.h"
+
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendActions.h"
+#include "llvm/Support/CommandLine.h"
+#include "clang/Tooling/CompilationDatabase.h"
+#include "clang/Tooling/Tooling.h"
 
 using namespace clang;
 using namespace clang::tooling;
@@ -63,9 +64,11 @@ unsigned int action, stmt_id_1, stmt_id_2;
 unsigned int counter = 0;
 
 class MyRecursiveASTVisitor
-    : public RecursiveASTVisitor<MyRecursiveASTVisitor>
-{
+    : public RecursiveASTVisitor<MyRecursiveASTVisitor> {
  public:
+  explicit MyRecursiveASTVisitor(ASTContext *Context)
+    : Context(Context) {}
+
   bool SelectStmt(Stmt *s);
   void NumberStmt(Stmt *s);
   void DeleteStmt(Stmt *s);
@@ -74,6 +77,9 @@ class MyRecursiveASTVisitor
 
   Rewriter Rewrite;
   CompilerInstance *ci;
+  
+ private:
+  ASTContext *Context;
 };
 
 bool MyRecursiveASTVisitor::SelectStmt(Stmt *s)
@@ -131,3 +137,24 @@ bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
   counter++;
   return true;
 }
+
+class MyConsumer : public clang::ASTConsumer {
+ public:
+  explicit MyConsumer(ASTContext *Context)
+    : Visitor(Context) {}
+
+  virtual void HandleTranslationUnit(clang::ASTContext &Context) {
+    Visitor.TraverseDecl(Context.getTranslationUnitDecl());
+  }
+
+ private:
+  MyRecursiveASTVisitor Visitor;
+};
+
+class MyAction : public clang::ASTFrontendAction {
+ public:
+  virtual clang::ASTConsumer *CreateASTConsumer(
+    clang::CompilerInstance &Compiler, llvm::StringRef InFile) {
+    return new MyConsumer(&Compiler.getASTContext());
+  }
+};

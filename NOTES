@@ -4,3 +4,6 @@
 The llvm IRC room suggests using a "tooling interface".
 http://clang.llvm.org/docs/LibTooling.html
 
+The tooling interface will run a "front end action".
+http://clang.llvm.org/docs/RAVFrontendAction.html
+
