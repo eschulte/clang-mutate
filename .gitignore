@@ -1,6 +1,7 @@
 *.o
 
 mutate
+mutate-tool
 hello
 hello_num.c
 hello_del.c
