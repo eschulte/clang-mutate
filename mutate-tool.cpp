@@ -41,21 +41,6 @@ static cl::extrahelp MoreHelp(
   "             i:#1:#2 - insert statement #1 before statement numbered #2\n"
   "             s:#1:#2 - swap statements #1 and #2\n");
 
-int main(int argc, const char **argv) {
-  llvm::OwningPtr<CompilationDatabase> Compilations(
-    FixedCompilationDatabase::loadFromCommandLine(argc, argv));
-  cl::ParseCommandLineOptions(argc, argv);
-  if (!Compilations) {
-    std::string ErrorMessage;
-    Compilations.reset(CompilationDatabase::loadFromDirectory(BuildPath,
-                                                              ErrorMessage));
-    if (!Compilations)
-      llvm::report_fatal_error(ErrorMessage);
-  }
-  ClangTool Tool(*Compilations, SourcePaths);
-  return Tool.run(newFrontendActionFactory<clang::SyntaxOnlyAction>());
-}
-
 enum ACTION { NUMBER, DELETE, INSERT, SWAP };
 
 Stmt *stmt1, *stmt2;
@@ -63,10 +48,10 @@ bool stmt_set_1, stmt_set_2 = false;
 unsigned int action, stmt_id_1, stmt_id_2;
 unsigned int counter = 0;
 
-class MyRecursiveASTVisitor
-    : public RecursiveASTVisitor<MyRecursiveASTVisitor> {
+class MutationVisitor
+    : public RecursiveASTVisitor<MutationVisitor> {
  public:
-  explicit MyRecursiveASTVisitor(ASTContext *Context)
+  explicit MutationVisitor(ASTContext *Context)
     : Context(Context) {}
 
   bool SelectStmt(Stmt *s);
@@ -82,10 +67,10 @@ class MyRecursiveASTVisitor
   ASTContext *Context;
 };
 
-bool MyRecursiveASTVisitor::SelectStmt(Stmt *s)
+bool MutationVisitor::SelectStmt(Stmt *s)
 { return ! isa<DefaultStmt>(s); }
 
-void MyRecursiveASTVisitor::NumberStmt(Stmt *s)
+void MutationVisitor::NumberStmt(Stmt *s)
 {
   char label[24];
   unsigned EndOff;
@@ -104,7 +89,7 @@ void MyRecursiveASTVisitor::NumberStmt(Stmt *s)
   Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
 }
 
-void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
+void MutationVisitor::DeleteStmt(Stmt *s)
 {
   char label[24];
   if(counter == stmt_id_1) {
@@ -113,7 +98,7 @@ void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
   }
 }
 
-void MyRecursiveASTVisitor::SaveStmt(Stmt *s)
+void MutationVisitor::SaveStmt(Stmt *s)
 {
   if (counter == stmt_id_1) {
     stmt_set_1 = true;
@@ -125,7 +110,7 @@ void MyRecursiveASTVisitor::SaveStmt(Stmt *s)
   }
 }
 
-bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
+bool MutationVisitor::VisitStmt(Stmt *s) {
   if (SelectStmt(s)) {
     switch(action) {
     case NUMBER: NumberStmt(s); break;
@@ -148,13 +133,28 @@ class MyConsumer : public clang::ASTConsumer {
   }
 
  private:
-  MyRecursiveASTVisitor Visitor;
+  MutationVisitor Visitor;
 };
 
-class MyAction : public clang::ASTFrontendAction {
+class MutationAction : public clang::ASTFrontendAction {
  public:
   virtual clang::ASTConsumer *CreateASTConsumer(
     clang::CompilerInstance &Compiler, llvm::StringRef InFile) {
     return new MyConsumer(&Compiler.getASTContext());
   }
 };
+
+int main(int argc, const char **argv) {
+  llvm::OwningPtr<CompilationDatabase> Compilations(
+    FixedCompilationDatabase::loadFromCommandLine(argc, argv));
+  cl::ParseCommandLineOptions(argc, argv);
+  if (!Compilations) {
+    std::string ErrorMessage;
+    Compilations.reset(CompilationDatabase::loadFromDirectory(BuildPath,
+                                                              ErrorMessage));
+    if (!Compilations)
+      llvm::report_fatal_error(ErrorMessage);
+  }
+  ClangTool Tool(*Compilations, SourcePaths);
+  return Tool.run(newFrontendActionFactory<MutationAction>());
+}
