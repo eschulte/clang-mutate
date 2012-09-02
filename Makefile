@@ -22,17 +22,11 @@ CLANGLIBS = \
     -lclangAST \
     -lclangLex \
     -lclangBasic
-    # -lclangStaticAnalyzerFrontend \
-    # -lclangStaticAnalyzerCheckers \
-    # -lclangStaticAnalyzerCore \
-    # -lclangARCMigrate \
 
 all: $(OBJECTS) $(EXES)
 
 %: %.o
-	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS) \
-		-I/usr/local/src/llvm/include \
-		-I/usr/local/src/llvm/tools/clang/include
+	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS)
 
 clean:
 	-rm -f $(EXES) $(OBJECTS) hello_* *~
