@@ -9,26 +9,30 @@ SOURCES = mutate.cpp mutate-tool.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 EXES = $(OBJECTS:.o=)
 CLANGLIBS = \
+    -lclangARCMigrate \
+    -lclangRewrite \
     -lclangFrontend \
-    -lclangDriver \
     -lclangSerialization \
+    -lclangDriver \
     -lclangTooling \
-    -lclangCommonOptionsParser \
     -lclangParse \
     -lclangSema \
     -lclangAnalysis \
-    -lclangRewrite \
     -lclangEdit \
     -lclangAST \
     -lclangLex \
-    -lclangBasic \
-    -lLLVMMC \
-    -lLLVMSupport
+    -lclangBasic
+    # -lclangStaticAnalyzerFrontend \
+    # -lclangStaticAnalyzerCheckers \
+    # -lclangStaticAnalyzerCore \
+    # -lclangARCMigrate \
 
 all: $(OBJECTS) $(EXES)
 
 %: %.o
-	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS)
+	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS) \
+		-I/usr/local/src/llvm/include \
+		-I/usr/local/src/llvm/tools/clang/include
 
 clean:
 	-rm -f $(EXES) $(OBJECTS) hello_* *~

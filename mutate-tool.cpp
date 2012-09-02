@@ -18,6 +18,10 @@
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 
+#include "llvm/MC/MCParser/MCAsmParser.h"
+#include "llvm/MC/MCAsmInfo.h"
+#include "llvm/MC/MCAsmBackend.h"
+
 using namespace clang;
 using namespace clang::tooling;
 using namespace llvm;
