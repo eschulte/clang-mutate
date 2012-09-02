@@ -1,5 +1,5 @@
 *.o
-
+a.out
 clang-mutate
 compile_commands.json
 hello
