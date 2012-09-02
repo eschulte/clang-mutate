@@ -1,9 +1,11 @@
 *.o
 a.out
+mutate
 clang-mutate
 compile_commands.json
 hello
-hello_num.c
-hello_del.c
-hello_ins.c
-hello_swp.c
+hello-no-include
+*_num.c
+*_del.c
+*_ins.c
+*_swp.c

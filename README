@@ -11,3 +11,17 @@ Running "make check" will do the following.
 3. Use clang-mutate to number all statements in the hello.c file
    
      ./clang-mutate n hello.c
+
+
+*NOTE*: None of the above works.
+
+
+What does work is the following which does not use LibTooling.
+However the following can not handle include statements and I was
+directed to use LibTooling rather than roll my own tool wrappers.
+
+1. Compile mutate with "make mutate"
+
+2. Use clang-mutate to number all statements in the hello.c file
+   
+     ./mutate n hello-no-include.c
