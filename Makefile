@@ -29,7 +29,7 @@ all: $(OBJECTS) $(EXES)
 	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS)
 
 clean:
-	-rm -f $(EXES) $(OBJECTS) compile_commands.json a.out hello_* *~
+	-rm -f $(EXES) $(OBJECTS) compile_commands.json a.out hello*_* *~
 
 compile_commands.json:
 	echo -e "[\n\
