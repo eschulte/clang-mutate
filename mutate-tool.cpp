@@ -14,7 +14,7 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "llvm/Support/CommandLine.h"
-#include "clang/Tooling/CompilationDatabase.h"
+#include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 
 using namespace clang;
@@ -189,13 +189,12 @@ class MutationAction : public clang::ASTFrontendAction {
 };
 
 int main(int argc, const char **argv) {
-  llvm::OwningPtr<CompilationDatabase> Compilations(
-    FixedCompilationDatabase::loadFromCommandLine(argc, argv));
-  cl::ParseCommandLineOptions(argc, argv);
-
+  CommonOptionsParser OptionsParser(argc, argv);
+  
   // check mutation op
   check_mut_opt(MutOpt);
-
-  ClangTool Tool(*Compilations, SourcePaths);
+  
+  ClangTool Tool(OptionsParser.GetCompilations(),
+                 OptionsParser.GetSourcePathList());
   return Tool.run(newFrontendActionFactory<MutationAction>());
 }

@@ -13,6 +13,7 @@ CLANGLIBS = \
     -lclangDriver \
     -lclangSerialization \
     -lclangTooling \
+    -lclangCommonOptionsParser \
     -lclangParse \
     -lclangSema \
     -lclangAnalysis \
