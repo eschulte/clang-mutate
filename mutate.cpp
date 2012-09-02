@@ -5,21 +5,38 @@
  */
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/ASTContext.h"
+#include "clang/AST/DeclBase.h"
+#include "clang/AST/DeclGroup.h"
+#include "clang/AST/Decl.h"
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/AST/Type.h"
+#include "clang/Basic/Builtins.h"
 #include "clang/Basic/Diagnostic.h"
 #include "clang/Basic/FileManager.h"
+#include "clang/Basic/FileSystemOptions.h"
+#include "clang/Basic/IdentifierTable.h"
+#include "clang/Basic/LangOptions.h"
 #include "clang/Basic/SourceManager.h"
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Basic/TargetOptions.h"
 #include "clang/Frontend/ASTConsumers.h"
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/DiagnosticOptions.h"
+#include "clang/Frontend/FrontendOptions.h"
 #include "clang/Frontend/HeaderSearchOptions.h"
+#include "clang/Frontend/PreprocessorOptions.h"
+#include "clang/Frontend/TextDiagnosticPrinter.h"
+#include "clang/Frontend/Utils.h"
 #include "clang/Lex/HeaderSearch.h"
 #include "clang/Lex/Lexer.h"
 #include "clang/Lex/Preprocessor.h"
 #include "clang/Parse/ParseAST.h"
+#include "clang/Parse/Parser.h"
 #include "clang/Rewrite/Rewriter.h"
 #include "clang/Rewrite/Rewriters.h"
+#include "clang/Sema/Lookup.h"
+#include "clang/Sema/Ownership.h"
+#include "clang/Sema/Sema.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/CommandLine.h"
@@ -131,9 +148,35 @@ MyASTConsumer::MyASTConsumer(const char *f)
   rv.ci->createFileManager();
   rv.ci->createSourceManager(rv.ci->getFileManager());
   rv.ci->createPreprocessor();
-  rv.ci->getPreprocessorOpts().UsePredefines = false;
+  rv.ci->getPreprocessorOpts().UsePredefines = true;
   rv.ci->setASTConsumer(this);
   rv.ci->createASTContext();
+
+  HeaderSearch headerSearch(rv.ci->getFileManager(),
+                            rv.ci->getDiagnostics(),
+                            rv.ci->getLangOpts(),
+                            pti);
+
+  HeaderSearchOptions headerSearchOptions;
+  
+  headerSearchOptions.AddPath(
+    "/usr/local/src/llvm/tools/clang/lib/Headers",
+    clang::frontend::Angled, 
+    false, 
+    false, 
+    false);
+
+  headerSearchOptions.AddPath(
+    "/usr/local/src/llvm/projects/compiler-rt/SDKs/linux/usr/include",
+    clang::frontend::Angled, 
+    false, 
+    false, 
+    false);
+  
+  clang::InitializePreprocessor(rv.ci->getPreprocessor(), 
+                                rv.ci->getPreprocessorOpts(),
+                                headerSearchOptions,
+                                rv.ci->getFrontendOpts());
 
   // Initialize rewriter
   rv.Rewrite.setSourceMgr(rv.ci->getSourceManager(), rv.ci->getLangOpts());
