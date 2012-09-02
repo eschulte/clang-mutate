@@ -1,7 +1,7 @@
 #include "clang/Lex/Lexer.h"
 #include "clang/Rewrite/Rewriter.h"
-#include "clang/AST/ASTConsumer.h"
 #include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/AST/ASTConsumer.h"
 #include "clang/AST/ASTContext.h"
 #include "clang/Frontend/ASTConsumers.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -9,13 +9,6 @@
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/CommandLine.h"
 #include <cstdio>
-
-// #include <sys/types.h>
-// #include <sys/stat.h>
-// #include "clang/Lex/Preprocessor.h"
-// #include "clang/Basic/Diagnostic.h"
-// #include "clang/Parse/ParseAST.h"
-// #include "clang/Rewrite/Rewriters.h"
 
 using namespace clang;
 using namespace clang::tooling;

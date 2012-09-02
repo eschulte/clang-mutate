@@ -1,4 +1,5 @@
 # -*- org -*-
+#+Options: ^:nil
 
 * Implement using the LibTooling interface
 The llvm IRC room suggests using a "tooling interface".
@@ -8,7 +9,7 @@ The tooling interface will run a "front end action".
 http://clang.llvm.org/docs/RAVFrontendAction.html
 
 * Issues
-** member access into incomplete type
+** DONE member access into incomplete type
 : $ make mutate-tool
 : clang++ -I/usr/local/include  -D_DEBUG -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -g -fvisibility-inlines-hidden -fno-exceptions -fno-rtti -fPIC -Woverloaded-virtual -Wcast-qual -fno-rtti   -c -o mutate-tool.o mutate-tool.cpp
 : mutate-tool.cpp:176:33: error: member access into incomplete type
@@ -29,3 +30,20 @@ Suggests stepping back to these versions
 |-------+------------------------------------------+--------|
 | llvm  | 61dfa77fce2b6b6261e43334aec060129eac5c6c | 152264 |
 | clang | 9ea396a886d46a9329817ad0a8c423510634d889 | 132239 |
+
+** DONE linking problem -- undefined reference to `llvm::createMCAsmParser
+*** these work in clang/tools
+compiling
+: if  clang++ -I/usr/local/src/llvm/include -I/usr/local/src/llvm/tools/clang/tools/clang-check  -D_DEBUG -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/usr/local/src/llvm/tools/clang/tools/clang-check/../../include -I/usr/local/src/llvm/tools/clang/tools/clang-check/../../include -g -fvisibility-inlines-hidden -fno-exceptions -fno-rtti -fPIC -Woverloaded-virtual -Wcast-qual -fno-strict-aliasing    -pedantic -Wno-long-long -Wall -W -Wno-unused-parameter -Wwrite-strings  -Wcovered-switch-default -c -MMD -MP -MF "/usr/local/src/llvm/tools/clang/tools/clang-check/Debug+Asserts/ClangCheck.d.tmp" -MT "/usr/local/src/llvm/tools/clang/tools/clang-check/Debug+Asserts/ClangCheck.o" -MT "/usr/local/src/llvm/tools/clang/tools/clang-check/Debug+Asserts/ClangCheck.d" ClangCheck.cpp -o /usr/local/src/llvm/tools/clang/tools/clang-check/Debug+Asserts/ClangCheck.o ; \
+:         then /bin/mv -f "/usr/local/src/llvm/tools/clang/tools/clang-check/Debug+Asserts/ClangCheck.d.tmp" "/usr/local/src/llvm/tools/clang/tools/clang-check/Debug+Asserts/ClangCheck.d"; else /bin/rm "/usr/local/src/llvm/tools/clang/tools/clang-check/Debug+Asserts/ClangCheck.d.tmp"; exit 1; fi
+linking
+: clang++ -I/usr/local/src/llvm/include -I/usr/local/src/llvm/tools/clang/tools/clang-check  -D_DEBUG -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -I/usr/local/src/llvm/tools/clang/tools/clang-check/../../include -I/usr/local/src/llvm/tools/clang/tools/clang-check/../../include -g -fvisibility-inlines-hidden -fno-exceptions -fno-rtti -fPIC -Woverloaded-virtual -Wcast-qual -fno-strict-aliasing  -g -Wl,-R -Wl,'$ORIGIN/../lib' -Wl,-R -Wl,/usr/local/src/llvm/Debug+Asserts/bin  -L/usr/local/src/llvm/Debug+Asserts/lib -L/usr/local/src/llvm/Debug+Asserts/lib -Wl,--version-script=/usr/local/src/llvm/autoconf/ExportMap.map     -pedantic -Wno-long-long -Wall -W -Wno-unused-parameter -Wwrite-strings  -Wcovered-switch-default  -o mutate-tool mutate-tool.o -lclangFrontend -lclangSerialization -lclangDriver -lclangTooling -lclangParse -lclangSema -lclangAnalysis -lclangEdit -lclangAST -lclangLex -lclangBasic -lLLVM-3.2svn   -lpthread -ldl -lm
+
+replacing clang-check with mutation-tool in the above works
+
+*** finding other references to MCAsmParser
+: rgrep createMCAsmParser *
+: lib/Sema/SemaStmtAsm.cpp:      Parser(createMCAsmParser(SrcMgr, Ctx, *Str.get(), *MAI));
+: lib/Sema/SemaStmtAsm.cpp:      TargetParser(TheTarget->createMCAsmParser(*STI, *Parser));
+: tools/driver/cc1as_main.cpp:  OwningPtr<MCAsmParser> Parser(createMCAsmParser(SrcMgr, Ctx,
+: tools/driver/cc1as_main.cpp:  OwningPtr<MCTargetAsmParser> TAP(TheTarget->createMCAsmParser(*STI, *Parser));
