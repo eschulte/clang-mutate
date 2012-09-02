@@ -7,3 +7,25 @@ http://clang.llvm.org/docs/LibTooling.html
 The tooling interface will run a "front end action".
 http://clang.llvm.org/docs/RAVFrontendAction.html
 
+* Issues
+** member access into incomplete type
+: $ make mutate-tool
+: clang++ -I/usr/local/include  -D_DEBUG -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -g -fvisibility-inlines-hidden -fno-exceptions -fno-rtti -fPIC -Woverloaded-virtual -Wcast-qual -fno-rtti   -c -o mutate-tool.o mutate-tool.cpp
+: mutate-tool.cpp:176:33: error: member access into incomplete type
+:       'clang::ASTContext'
+:     Visitor.TraverseDecl(Context.getTranslationUnitDecl());
+:                                 ^
+: /usr/local/include/clang/Basic/Builtins.h:29:9: note: forward
+:       declaration of 'clang::ASTContext'
+:   class ASTContext;
+:         ^
+: 1 error generated.
+: make: *** [mutate-tool.o] Error 1
+
+http://permalink.gmane.org/gmane.comp.debugging.lldb.devel/982
+
+Suggests stepping back to these versions
+|       | git                                      |    svn |
+|-------+------------------------------------------+--------|
+| llvm  | 61dfa77fce2b6b6261e43334aec060129eac5c6c | 152264 |
+| clang | 9ea396a886d46a9329817ad0a8c423510634d889 | 132239 |
