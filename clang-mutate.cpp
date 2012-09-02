@@ -59,8 +59,7 @@ void check_mut_opt(std::string str){
   case 'd': action=DELETE; break;
   case 'i': action=INSERT; break;
   case 's': action=SWAP;   break;
-  default: llvm::report_fatal_error("invalid mut-opt, "
-                                    "try ./mutation-tool -help\n");
+  default: llvm::report_fatal_error("invalid mut-opt, try -help\n");
   }
 
   if(action != NUMBER) {

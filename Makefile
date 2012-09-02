@@ -4,7 +4,7 @@ RTTIFLAG := -fno-rtti
 CXXFLAGS := $(shell llvm-config --cxxflags) $(RTTIFLAG)
 LLVMLDFLAGS := $(shell llvm-config --ldflags --libs $(LLVMCOMPONENTS))
 
-SOURCES = mutate-tool.cpp
+SOURCES = clang-mutate.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 EXES = $(OBJECTS:.o=)
 CLANGLIBS = \
@@ -40,5 +40,5 @@ compile_commands.json:
 	  }\n\
 	]\n" > $@
 
-check: mutate-tool hello.c compile_commands.json
-	./mutate-tool n hello.c
+check: clang-mutate hello.c compile_commands.json
+	./clang-mutate n hello.c

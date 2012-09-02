@@ -1,7 +1,6 @@
 *.o
 
-mutate
-mutate-tool
+clang-mutate
 compile_commands.json
 hello
 hello_num.c
