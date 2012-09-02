@@ -3,28 +3,31 @@
  * Adapted from the very good CIrewriter.cpp tutorial in
  * http://github.com/loarabia/Clang-tutorial
  */
+#include "clang/AST/ASTConsumer.h"
+#include "clang/AST/ASTContext.h"
+#include "clang/AST/RecursiveASTVisitor.h"
+#include "clang/Basic/Diagnostic.h"
+#include "clang/Basic/FileManager.h"
+#include "clang/Basic/SourceManager.h"
+#include "clang/Basic/TargetInfo.h"
+#include "clang/Basic/TargetOptions.h"
+#include "clang/Frontend/ASTConsumers.h"
+#include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/HeaderSearchOptions.h"
+#include "clang/Lex/HeaderSearch.h"
+#include "clang/Lex/Lexer.h"
+#include "clang/Lex/Preprocessor.h"
+#include "clang/Parse/ParseAST.h"
+#include "clang/Rewrite/Rewriter.h"
+#include "clang/Rewrite/Rewriters.h"
+#include "clang/Tooling/CommonOptionsParser.h"
+#include "clang/Tooling/Tooling.h"
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/Host.h"
+#include "llvm/Support/raw_ostream.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
-
-#include "llvm/Support/Host.h"
-#include "llvm/Support/raw_ostream.h"
-
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/HeaderSearchOptions.h"
-#include "clang/Basic/TargetOptions.h"
-#include "clang/Basic/TargetInfo.h"
-#include "clang/Basic/FileManager.h"
-#include "clang/Basic/SourceManager.h"
-#include "clang/Lex/HeaderSearch.h"
-#include "clang/Lex/Preprocessor.h"
-#include "clang/Lex/Lexer.h"
-#include "clang/Basic/Diagnostic.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/AST/ASTConsumer.h"
-#include "clang/Parse/ParseAST.h"
-#include "clang/Rewrite/Rewriters.h"
-#include "clang/Rewrite/Rewriter.h"
 
 using namespace clang;
 
