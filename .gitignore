@@ -2,6 +2,7 @@
 
 mutate
 mutate-tool
+compile_commands.json
 hello
 hello_num.c
 hello_del.c

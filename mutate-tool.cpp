@@ -25,17 +25,12 @@ cl::opt<std::string> MutOpt(
   cl::Positional,
   cl::desc("<mut-op>"));
 
-cl::list<std::string> SourcePaths(
-  cl::Positional,
-  cl::desc("<source0> [... <sourceN>]"),
-  cl::OneOrMore);
-
-static cl::extrahelp MoreHelp(
-  "   mut-op  - should be one of the following;\n"
-  "             n       - number all statements\n"
-  "             d:#1    - delete the statement numbered #1\n"
-  "             i:#1:#2 - insert statement #1 before statement numbered #2\n"
-  "             s:#1:#2 - swap statements #1 and #2\n");
+static cl::extrahelp MoreHelp("\n"
+  " mut-op should be one of the following;\n"
+  " n       - number all statements\n"
+  " d:#1    - delete the statement numbered #1\n"
+  " i:#1:#2 - insert statement #1 before statement numbered #2\n"
+  " s:#1:#2 - swap statements #1 and #2\n");
 
 int parse_int_from(std::string str, int *offset){
   char buffer[12];
@@ -57,14 +52,15 @@ int parse_int_from(std::string str, int *offset){
 
 void check_mut_opt(std::string str){
   int offset;
-
+  
   // check the action
   switch(str[0]){
   case 'n': action=NUMBER; break;
   case 'd': action=DELETE; break;
   case 'i': action=INSERT; break;
   case 's': action=SWAP;   break;
-  default: llvm::report_fatal_error("try ./mutation-tool -help\n");
+  default: llvm::report_fatal_error("invalid mut-opt, "
+                                    "try ./mutation-tool -help\n");
   }
 
   if(action != NUMBER) {
@@ -90,16 +86,16 @@ class MutationVisitor
  public:
   explicit MutationVisitor(ASTContext *Context)
     : Context(Context) {}
-
+  
   bool SelectStmt(Stmt *s);
   void NumberStmt(Stmt *s);
   void DeleteStmt(Stmt *s);
   void   SaveStmt(Stmt *s);
   bool  VisitStmt(Stmt *s);
-
+  
   Rewriter Rewrite;
   CompilerInstance *ci;
-
+  
  private:
   ASTContext *Context;
 };
@@ -112,11 +108,11 @@ void MutationVisitor::NumberStmt(Stmt *s)
   char label[24];
   unsigned EndOff;
   SourceLocation END = s->getLocEnd();
-
+  
   sprintf(label, "/* %d[ */", counter);
   Rewrite.InsertText(s->getLocStart(), label, false);
   sprintf(label, "/* ]%d */", counter);
-
+  
   // Adjust the end offset to the end of the last token, instead of being the
   // start of the last token.
   EndOff = Lexer::MeasureTokenLength(END,
@@ -168,7 +164,7 @@ class MyConsumer : public clang::ASTConsumer {
   virtual void HandleTranslationUnit(clang::ASTContext &Context) {
     Visitor.TraverseDecl(Context.getTranslationUnitDecl());
   }
-
+  
  private:
   MutationVisitor Visitor;
 };
