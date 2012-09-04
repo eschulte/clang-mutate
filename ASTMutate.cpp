@@ -36,11 +36,13 @@ namespace {
 
     virtual void HandleTranslationUnit(ASTContext &Context) {
       TranslationUnitDecl *D = Context.getTranslationUnitDecl();
-      dbgs() << "Handling a TU\n";
-      dbgs() << "initializing Rewriter\n";
+      counter=0;
       Rewrite.setSourceMgr(Context.getSourceManager(),
                            Context.getLangOpts());
+      
       TraverseDecl(D);
+      
+      OutputRewritten(Context);
     };
     
     Rewriter Rewrite;
@@ -50,7 +52,6 @@ namespace {
 
     void NumberStmt(Stmt *s)
     {
-      dbgs() << "\t-> NumberStmt\n";
       char label[24];
       unsigned EndOff;
       SourceLocation END = s->getLocEnd();
@@ -66,23 +67,19 @@ namespace {
                                          Rewrite.getLangOpts());
 
       Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
-      dbgs() << "\t<- NumberStmt\n";
     }
 
     void DeleteStmt(Stmt *s)
     {
-      dbgs() << "\t<- DeleteStmt\n";
       char label[24];
       if(counter == Stmt1) {
         sprintf(label, "/* deleted:%d */", counter);
         Rewrite.ReplaceText(s->getSourceRange(), label);
       }
-      dbgs() << "\t-> DeleteStmt\n";
     }
 
     void SaveStmt(Stmt *s)
     {
-      dbgs() << "\t-> SaveStmt\n";
       if (counter == Stmt1) {
         stmt_set_1 = true;
         stmt1 = s;
@@ -91,7 +88,6 @@ namespace {
         stmt_set_2 = true;
         stmt2 = s;
       }
-      llvm::errs() << "\t<- SaveStmt\n";
     }
 
     bool VisitStmt(Stmt *s) {
@@ -105,6 +101,24 @@ namespace {
       }
       counter++;
       return true;
+    }
+
+    void OutputRewritten(ASTContext &Context) {
+      // Output file prefix
+      Out.changeColor(llvm::raw_ostream::GREEN) << "/* ";
+      switch(Action){
+      case NUMBER: Out << "numbered"; break;
+      case DELETE: Out << "deleted "  << Stmt1; break;
+      case INSERT: Out << "copying "  << Stmt1 << " to"   << Stmt2; break;
+      case SWAP:   Out << "swapping " << Stmt1 << " with" << Stmt2; break;
+      }
+      Out << " using clang-mutate */\n\n";
+      Out.resetColor();
+
+      // Now output rewritten source code
+      const RewriteBuffer *RewriteBuf = 
+        Rewrite.getRewriteBufferFor(Context.getSourceManager().getMainFileID());
+      Out << std::string(RewriteBuf->begin(), RewriteBuf->end());
     }
     
   private:
