@@ -11,7 +11,34 @@ http://clang.llvm.org/docs/RAVFrontendAction.html
 Clang tools depend on the existence of Compilation Databases.
 http://clang.llvm.org/docs/JSONCompilationDatabase.html
 
-* Issues
+* Notes and Issues
+** known working versions of LLVM and Clang
+LLVM
+: Path: .
+: Working Copy Root Path: /usr/local/src/llvm
+: URL: http://llvm.org/svn/llvm-project/llvm/trunk
+: Repository Root: http://llvm.org/svn/llvm-project
+: Repository UUID: 91177308-0d34-0410-b5e6-96231b3b80d8
+: Revision: 163018
+: Node Kind: directory
+: Schedule: normal
+: Last Changed Author: hliao
+: Last Changed Rev: 163018
+: Last Changed Date: 2012-08-31 14:12:31 -0600 (Fri, 31 Aug 2012)
+
+Clang
+: Path: .
+: Working Copy Root Path: /usr/local/src/llvm/tools/clang
+: URL: http://llvm.org/svn/llvm-project/cfe/trunk
+: Repository Root: http://llvm.org/svn/llvm-project
+: Repository UUID: 91177308-0d34-0410-b5e6-96231b3b80d8
+: Revision: 163034
+: Node Kind: directory
+: Schedule: normal
+: Last Changed Author: lattner
+: Last Changed Rev: 163034
+: Last Changed Date: 2012-08-31 16:39:21 -0600 (Fri, 31 Aug 2012)
+
 ** DONE member access into incomplete type
 : $ make mutate-tool
 : clang++ -I/usr/local/include  -D_DEBUG -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -g -fvisibility-inlines-hidden -fno-exceptions -fno-rtti -fPIC -Woverloaded-virtual -Wcast-qual -fno-rtti   -c -o mutate-tool.o mutate-tool.cpp
