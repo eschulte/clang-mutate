@@ -1,6 +1,7 @@
 *.o
 a.out
 mutate
+mutate2
 clang-mutate
 compile_commands.json
 hello
