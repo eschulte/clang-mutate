@@ -48,8 +48,8 @@ namespace {
 class ActionFactory {
 public:
   clang::ASTConsumer *newASTConsumer() {
-    // if (Number)
-    //   return clang::CreateASTNumberer();
+    if (Number)
+      return clang::CreateASTNumberer();
     if (Delete)
       return clang::CreateASTDeleter(Stmt1);
     // if (Insert)

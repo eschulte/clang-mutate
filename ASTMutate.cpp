@@ -107,6 +107,10 @@ namespace {
   };
 }
 
-ASTConsumer *CreateASTDeleter(int Stmt){
+ASTConsumer *clang::CreateASTDeleter(int Stmt){
   return new ASTMutator(0, /*Dump=*/ true, DELETE, Stmt, -1);
+}
+
+ASTConsumer *clang::CreateASTNumberer(){
+  return new ASTMutator(0, /*Dump=*/ true, NUMBER, -1, -1);
 }

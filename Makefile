@@ -38,7 +38,7 @@ clang-mutate: ASTMutate.o clang-mutate.o
 	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
 
 clean:
-	-rm -f $(EXES) $(OBJECTS) ASTMutator.o compile_commands.json a.out hello_* *~
+	-rm -f $(EXES) $(OBJECTS) ASTMutator.o ASTMutate.o compile_commands.json a.out hello_* *~
 
 compile_commands.json:
 	echo -e "[\n\
