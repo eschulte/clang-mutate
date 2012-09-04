@@ -64,4 +64,13 @@ namespace clang {
       unsigned int counter;
   };
   /* class MyRecursiveASTVisitor : public RecursiveASTVisitor<MyRecursiveASTVisitor>; */
+
+  class MyASTConsumer : public ASTConsumer
+  {
+  public:
+    MyASTConsumer(ACTION action, const char *f, int stmt_id_1, int stmt_id_2);
+    virtual bool HandleTopLevelDecl(DeclGroupRef d);
+
+    MyRecursiveASTVisitor rv;
+  };
 }
