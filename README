@@ -1,27 +1,42 @@
-Manipulate C-family ASTs with Clang
+Manipulate C-family ASTs with Clang                        -*- org -*-
 
-Running "make check" will do the following.
+Run make to compile the clang-mutate executable.  This tool performs
+four operations on C-language source files.
 
-1. Compile the clang-mutate executable which uses Clang's LibTooling
-   http://clang.llvm.org/docs/LibTooling.html
+- number :: numbers each statement in the input
+- delete :: deletes that numbered statement
+- insert :: copies the second numbered statement before the first
+- swap   :: swaps the two numbered statements
 
-2. Build a trivial Compilation Database needed by clang tools
-   http://clang.llvm.org/docs/JSONCompilationDatabase.html
+For example:
+: $ cat hello.c 
+: int main(int argc, char *argv[])
+: {
+:   puts("hello");
+:   return 0;
+: }
+: 
+: $ ./clang-mutate -number hello.c -- clang
+: Processing: hello.c.
+: /* numbered using clang-mutate */
+: int main(int argc, char *argv[])
+: /* 0[ */{
+:   /* 3[ *//* 2[ *//* 1[ */puts/* ]2 *//* ]3 */(/* 5[ *//* 4[ */"hello"/* ]4 *//* ]5 */)/* ]1 */;
+:   /* 6[ */return /* 7[ */0/* ]6 *//* ]7 */;
+: }/* ]0 */
+: 
+: $ ./clang-mutate -delete -stmt1=6 hello.c -- clang
+: Processing: hello.c.
+: /* deleted 6 using clang-mutate */
+: int main(int argc, char *argv[])
+: {
+:   puts("hello");
+:   /* deleted:6 */;
+: }
 
-3. Use clang-mutate to number all statements in the hello.c file
-   
-     ./clang-mutate n hello.c
+This uses the clang LibTooling [1] interface, which means that the
+clang-mutate executable works best when the executable is copied to
+the same directory as the clang executable.  Running "make install"
+will do this for you.
 
-
-*NOTE*: None of the above works.
-
-
-What does work is the following which does not use LibTooling.
-However the following can not handle include statements and I was
-directed to use LibTooling rather than roll my own tool wrappers.
-
-1. Compile mutate with "make mutate"
-
-2. Use clang-mutate to number all statements in the hello.c file
-   
-     ./mutate n hello-no-include.c
+[1] http://clang.llvm.org/docs/LibTooling.html

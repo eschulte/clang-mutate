@@ -23,7 +23,7 @@ CLANGLIBS = \
 	-lLLVM-3.2svn
 
 all: $(OBJECTS) $(EXES)
-.PHONY: clean check
+.PHONY: clean install
 
 %: %.o
 	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS)
@@ -34,6 +34,9 @@ clang-mutate: ASTMutate.o clang-mutate.o
 clean:
 	-rm -f $(EXES) $(OBJECTS) ASTMutate.o compile_commands.json a.out hello_* *~
 
+install: clang-mutate
+	cp $< $$(dirname $$(which clang))
+
 # An alternative to giving compiler info after -- on the command line
 compile_commands.json:
 	echo -e "[\n\
@@ -43,6 +46,3 @@ compile_commands.json:
 	    \"file\": \"$$(pwd)/hello.c\"\n\
 	  }\n\
 	]\n" > $@
-
-check: clang-mutate hello.c
-	./clang-mutate n hello.c -- clang
