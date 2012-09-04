@@ -86,8 +86,15 @@ namespace {
     void DeleteStmt(Stmt *s)
     {
       char label[24];
+      // TODO: Could check if next token is semicolon and remove it
+      //       depending on the context.  Alternately maybe clang has
+      //       a transform which removed superfluous semicolons.
+      //       
+      // SourceLocation Beg = s->getLocStart();
+      // SourceLocation End = s->getLocEnd();
       if(Counter == Stmt1) {
         sprintf(label, "/* deleted:%d */", Counter);
+        // Rewrite.ReplaceText(SourceRange(Beg,End), label);
         Rewrite.ReplaceText(s->getSourceRange(), label);
       }
     }
