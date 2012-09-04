@@ -1,4 +1,5 @@
-#include <stdio.h>
+// #include <stdio.h> removed so we can test w/o having to move the
+//                    executable to the clang directory
 
 int do_math(int input)
 {

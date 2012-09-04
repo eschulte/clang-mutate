@@ -110,7 +110,7 @@ MyASTConsumer::MyASTConsumer(ACTION action, const char *f,
       rv.Rewrite.ReplaceText(rv.stmt1->getSourceRange(), rep2);
       rv.Rewrite.ReplaceText(rv.stmt2->getSourceRange(), rep1);
       break;
-    default:
+    default: break;
     }
 
     // Output file prefix

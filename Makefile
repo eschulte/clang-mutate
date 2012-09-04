@@ -6,7 +6,6 @@ LLVMLDFLAGS := $(shell llvm-config --ldflags --libs $(LLVMCOMPONENTS))
 
 SOURCES = mutate.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
-BASE_OBJECTS = ASTMutator.o
 EXES = $(OBJECTS:.o=)
 CLANGLIBS = \
 	-lclangFrontend \
@@ -26,11 +25,14 @@ CLANGLIBS = \
 all: $(OBJECTS) $(EXES)
 .PHONY: clean check
 
-%: $(BASE_OBJECTS) %.o
+%: %.o
+	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS)
+
+mutate: ASTMutator.o mutate.o
 	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
 
 clean:
-	-rm -f $(EXES) $(OBJECTS) $(BASE_OBJECTS) compile_commands.json a.out hello*_* *~
+	-rm -f $(EXES) $(OBJECTS) ASTMutator.o compile_commands.json a.out hello_* *~
 
 compile_commands.json:
 	echo -e "[\n\
