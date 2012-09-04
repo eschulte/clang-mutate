@@ -4,7 +4,7 @@ RTTIFLAG := -fno-rtti
 CXXFLAGS := $(shell llvm-config --cxxflags) $(RTTIFLAG)
 LLVMLDFLAGS := $(shell llvm-config --ldflags --libs $(LLVMCOMPONENTS))
 
-SOURCES = mutate.cpp mutate2.cpp clang-mutate.cpp
+SOURCES = clang-mutate.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 EXES = $(OBJECTS:.o=)
 CLANGLIBS = \
@@ -28,18 +28,13 @@ all: $(OBJECTS) $(EXES)
 %: %.o
 	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS)
 
-mutate: ASTMutator.o mutate.o
-	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
-
-mutate2: ASTMutator.o mutate2.o
-	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
-
 clang-mutate: ASTMutate.o clang-mutate.o
 	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
 
 clean:
-	-rm -f $(EXES) $(OBJECTS) ASTMutator.o ASTMutate.o compile_commands.json a.out hello_* *~
+	-rm -f $(EXES) $(OBJECTS) ASTMutate.o compile_commands.json a.out hello_* *~
 
+# An alternative to giving compiler info after -- on the command line
 compile_commands.json:
 	echo -e "[\n\
 	  {\n\
@@ -49,5 +44,5 @@ compile_commands.json:
 	  }\n\
 	]\n" > $@
 
-check: clang-mutate hello.c compile_commands.json
-	./clang-mutate n hello.c
+check: clang-mutate hello.c
+	./clang-mutate n hello.c -- clang
