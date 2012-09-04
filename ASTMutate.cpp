@@ -107,10 +107,18 @@ namespace {
   };
 }
 
+ASTConsumer *clang::CreateASTNumberer(){
+  return new ASTMutator(0, /*Dump=*/ true, NUMBER, -1, -1);
+}
+
 ASTConsumer *clang::CreateASTDeleter(int Stmt){
   return new ASTMutator(0, /*Dump=*/ true, DELETE, Stmt, -1);
 }
 
-ASTConsumer *clang::CreateASTNumberer(){
-  return new ASTMutator(0, /*Dump=*/ true, NUMBER, -1, -1);
+ASTConsumer *clang::CreateASTInserter(int Stmt1, int Stmt2){
+  return new ASTMutator(0, /*Dump=*/ true, INSERT, Stmt1, Stmt2);
+}
+
+ASTConsumer *clang::CreateASTSwapper(int Stmt1, int Stmt2){
+  return new ASTMutator(0, /*Dump=*/ true, SWAP, Stmt1, Stmt2);
 }

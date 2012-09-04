@@ -52,10 +52,10 @@ public:
       return clang::CreateASTNumberer();
     if (Delete)
       return clang::CreateASTDeleter(Stmt1);
-    // if (Insert)
-    //   return clang::CreateASTInserter(Stmt1, Stmt2);
-    // if (Swap)
-    //   return clang::CreateASTSwapper(Stmt1, Stmt2);
+    if (Insert)
+      return clang::CreateASTInserter(Stmt1, Stmt2);
+    if (Swap)
+      return clang::CreateASTSwapper(Stmt1, Stmt2);
     errs() << "must supply one of the [number,delete,insert,swap] options\n";
     exit(EXIT_FAILURE);
   }

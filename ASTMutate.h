@@ -10,11 +10,10 @@ namespace clang {
 
 enum ACTION { NUMBER, DELETE, INSERT, SWAP };
 
-// Deletes the specified statement from an AST
-ASTConsumer *CreateASTDeleter(int Stmt);
-
-// Number all statements in an AST
 ASTConsumer *CreateASTNumberer();
+ASTConsumer *CreateASTDeleter(int Stmt);
+ASTConsumer *CreateASTInserter(int Stmt1, int Stmt2);
+ASTConsumer *CreateASTSwapper(int Stmt1, int Stmt2);
 
 }
 
