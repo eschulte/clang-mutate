@@ -29,20 +29,20 @@ static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static cl::extrahelp MoreHelp(
     "\tFor example, to number all statements in a file, use:\n"
     "\n"
-    "\t  ./mutate2 n file.c\n"
+    "\t  ./mutate2 -number file.c\n"
+    "\n"
+    "\tor to delete the 12th statement, use:\n"
+    "\n"
+    "\t  ./mutate2 -delete -stmt1=12 file.c\n"
     "\n"
 );
 
-cl::opt<std::string> MutOp(
-  cl::Positional,
-  cl::desc("<mut-op>"));
-
-static cl::opt<bool> Number("number", "number all statements");
-static cl::opt<bool> Delete("delete", "delete stmt-1");
-static cl::opt<bool> Insert("insert", "insert a copy of stmt-1 after stmt-2");
-static cl::opt<bool>   Swap("swap",   "Swap stmt-1 and stmt-2");
-static cl::opt<int>   Stmt1("stmt-1", "first statement argument to mut-opt");
-static cl::opt<int>   Stmt2("stmt-2", "second statement argument to mut-opt");
+static cl::opt<bool> Number("number", cl::desc("number all statements"));
+static cl::opt<bool> Delete("delete", cl::desc("delete stmt1"));
+static cl::opt<bool> Insert("insert", cl::desc("copy stmt1 to after stmt2"));
+static cl::opt<bool>   Swap("swap",   cl::desc("Swap stmt1 and stmt2"));
+static cl::opt<int>   Stmt1("stmt1",  cl::desc("statement 1 for mutation ops"));
+static cl::opt<int>   Stmt2("stmt2",  cl::desc("statement 2 for mutation ops"));
 
 namespace {
 class ActionFactory {
@@ -56,7 +56,7 @@ public:
       return clang::CreateASTInserter(Stmt1, Stmt2);
     if (Swap)
       return clang::CreateASTSwapper(Stmt1, Stmt2);
-    errs() << "must supply one of the [number,delete,insert,swap] options\n";
+    errs() << "Must supply one of the [number,delete,insert,swap] options.\n";
     exit(EXIT_FAILURE);
   }
 };
