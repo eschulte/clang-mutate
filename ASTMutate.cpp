@@ -105,15 +105,14 @@ namespace {
 
     void OutputRewritten(ASTContext &Context) {
       // Output file prefix
-      Out.changeColor(llvm::raw_ostream::GREEN) << "/* ";
+      Out << "/* ";
       switch(Action){
       case NUMBER: Out << "numbered"; break;
       case DELETE: Out << "deleted "  << Stmt1; break;
       case INSERT: Out << "copying "  << Stmt1 << " to"   << Stmt2; break;
       case SWAP:   Out << "swapping " << Stmt1 << " with" << Stmt2; break;
       }
-      Out << " using clang-mutate */\n\n";
-      Out.resetColor();
+      Out << " using clang-mutate */\n";
 
       // Now output rewritten source code
       const RewriteBuffer *RewriteBuf = 
