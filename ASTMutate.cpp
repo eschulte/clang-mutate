@@ -36,12 +36,26 @@ namespace {
 
     virtual void HandleTranslationUnit(ASTContext &Context) {
       TranslationUnitDecl *D = Context.getTranslationUnitDecl();
-      counter=0;
+      // Setup
+      Counter=0;
       Rewrite.setSourceMgr(Context.getSourceManager(),
                            Context.getLangOpts());
-      
+      // Run Recursive AST Visitor
       TraverseDecl(D);
-      
+      // Finish Up
+      switch(Action){
+      case INSERT:
+        Rewritten2 = Rewrite.getRewrittenText(Range2);
+        Rewrite.InsertText(Range1.getBegin(), (Rewritten2+" "), true);
+        break;
+      case SWAP:
+        Rewritten1 = Rewrite.getRewrittenText(Range1);
+        Rewritten2 = Rewrite.getRewrittenText(Range2);
+        Rewrite.ReplaceText(Range1, Rewritten2);
+        Rewrite.ReplaceText(Range2, Rewritten1);
+        break;
+      default: break;
+      }
       OutputRewritten(Context);
     };
     
@@ -56,9 +70,9 @@ namespace {
       unsigned EndOff;
       SourceLocation END = s->getLocEnd();
 
-      sprintf(label, "/* %d[ */", counter);
+      sprintf(label, "/* %d[ */", Counter);
       Rewrite.InsertText(s->getLocStart(), label, false);
-      sprintf(label, "/* ]%d */", counter);
+      sprintf(label, "/* ]%d */", Counter);
   
       // Adjust the end offset to the end of the last token, instead
       // of being the start of the last token.
@@ -72,22 +86,18 @@ namespace {
     void DeleteStmt(Stmt *s)
     {
       char label[24];
-      if(counter == Stmt1) {
-        sprintf(label, "/* deleted:%d */", counter);
+      if(Counter == Stmt1) {
+        sprintf(label, "/* deleted:%d */", Counter);
         Rewrite.ReplaceText(s->getSourceRange(), label);
       }
     }
 
     void SaveStmt(Stmt *s)
     {
-      if (counter == Stmt1) {
-        stmt_set_1 = true;
-        stmt1 = s;
-      }
-      if (counter == Stmt2) {
-        stmt_set_2 = true;
-        stmt2 = s;
-      }
+      if (Counter == Stmt1)
+        Range1 = s->getSourceRange();
+      if (Counter == Stmt2)
+        Range2 = s->getSourceRange();
     }
 
     bool VisitStmt(Stmt *s) {
@@ -99,7 +109,7 @@ namespace {
         case SWAP:     SaveStmt(s); break;
         }
       }
-      counter++;
+      Counter++;
       return true;
     }
 
@@ -109,8 +119,8 @@ namespace {
       switch(Action){
       case NUMBER: Out << "numbered"; break;
       case DELETE: Out << "deleted "  << Stmt1; break;
-      case INSERT: Out << "copying "  << Stmt1 << " to"   << Stmt2; break;
-      case SWAP:   Out << "swapping " << Stmt1 << " with" << Stmt2; break;
+      case INSERT: Out << "copying "  << Stmt1 << " to "   << Stmt2; break;
+      case SWAP:   Out << "swapping " << Stmt1 << " with " << Stmt2; break;
       }
       Out << " using clang-mutate */\n";
 
@@ -125,9 +135,9 @@ namespace {
     bool Dump;
     ACTION Action;
     int Stmt1, Stmt2;
-    unsigned int counter;
-    Stmt *stmt1, *stmt2;
-    bool stmt_set_1, stmt_set_2;
+    unsigned int Counter;
+    SourceRange Range1, Range2;
+    std::string Rewritten1, Rewritten2;
   };
 }
 
