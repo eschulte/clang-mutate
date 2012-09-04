@@ -1,6 +1,6 @@
 //===--------------- clang-mutate.cpp - Clang mutation tool ---------------===//
 //
-// Adopted from ClangCheck.cpp by Eric Schulte
+// Copyright (C) 2012 Eric Schulte
 //
 //===----------------------------------------------------------------------===//
 //

@@ -1,3 +1,4 @@
+// Copyright (C) 2012 Eric Schulte
 #include "ASTMutate.h"
 #include "clang/Basic/FileManager.h"
 #include "clang/Basic/Diagnostic.h"

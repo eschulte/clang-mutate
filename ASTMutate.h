@@ -1,4 +1,4 @@
-//                                                         -*- C++ -*-
+// Copyright (C) 2012 Eric Schulte                         -*- C++ -*-
 #ifndef DRIVER_ASTMUTATORS_H
 #define DRIVER_ASTMUTATORS_H
 
