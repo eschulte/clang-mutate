@@ -43,8 +43,8 @@
 namespace clang {
   enum ACTION { NUMBER, DELETE, INSERT, SWAP };
   
-  class MyRecursiveASTVisitor
-    : public RecursiveASTVisitor<MyRecursiveASTVisitor>
+  class MutatorASTVisitor
+    : public RecursiveASTVisitor<MutatorASTVisitor>
   {
   public:
     bool SelectStmt(Stmt *s);
@@ -63,14 +63,14 @@ namespace clang {
       bool stmt_set_1, stmt_set_2;
       unsigned int counter;
   };
-  /* class MyRecursiveASTVisitor : public RecursiveASTVisitor<MyRecursiveASTVisitor>; */
+  /* class MutatorASTVisitor : public RecursiveASTVisitor<MutatorASTVisitor>; */
 
-  class MyASTConsumer : public ASTConsumer
+  class MutatorASTConsumer : public ASTConsumer
   {
   public:
-    MyASTConsumer(ACTION action, const char *f, int stmt_id_1, int stmt_id_2);
+    MutatorASTConsumer(ACTION action, const char *f, int stmt_id_1, int stmt_id_2);
     virtual bool HandleTopLevelDecl(DeclGroupRef d);
 
-    MyRecursiveASTVisitor rv;
+    MutatorASTVisitor rv;
   };
 }

@@ -4,10 +4,10 @@
 #include <stdio.h>
 using namespace clang;
 
-bool MyRecursiveASTVisitor::SelectStmt(Stmt *s)
+bool MutatorASTVisitor::SelectStmt(Stmt *s)
 { return ! isa<DefaultStmt>(s); }
 
-void MyRecursiveASTVisitor::NumberStmt(Stmt *s)
+void MutatorASTVisitor::NumberStmt(Stmt *s)
 {
   char label[24];
   unsigned EndOff;
@@ -26,7 +26,7 @@ void MyRecursiveASTVisitor::NumberStmt(Stmt *s)
   Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
 }
 
-void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
+void MutatorASTVisitor::DeleteStmt(Stmt *s)
 {
   char label[24];
   if(counter == stmt_id_1) {
@@ -35,7 +35,7 @@ void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
   }
 }
 
-void MyRecursiveASTVisitor::SaveStmt(Stmt *s)
+void MutatorASTVisitor::SaveStmt(Stmt *s)
 {
   if (counter == stmt_id_1) {
     stmt_set_1 = true;
@@ -47,7 +47,7 @@ void MyRecursiveASTVisitor::SaveStmt(Stmt *s)
   }
 }
 
-bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
+bool MutatorASTVisitor::VisitStmt(Stmt *s) {
   if (SelectStmt(s)) {
     switch(action) {
     case NUMBER: NumberStmt(s); break;
@@ -61,9 +61,9 @@ bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
 }
 
 
-// ASTConsumer *clang::CreateMyRecursiveASTVisitor(StringRef MutOp,
+// ASTConsumer *clang::CreateMutatorASTVisitor(StringRef MutOp,
 //                                                 std::list<int> IDs) {
-//   MyRecursiveASTVisitor Visitor = new MyRecursiveASTVisitor(Mutop);
+//   MutatorASTVisitor Visitor = new MutatorASTVisitor(Mutop);
   
 //   // Parse Operation
 //   switch(MutOp[0]){
@@ -85,8 +85,8 @@ bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
 //   return Visitor;
 // }
 
-MyASTConsumer::MyASTConsumer(ACTION action, const char *f,
-                             int stmt_id_1, int stmt_id_2)
+MutatorASTConsumer::MutatorASTConsumer(ACTION action, const char *f,
+                                       int stmt_id_1, int stmt_id_2)
 {
   rv.action = action;
   rv.stmt_id_1 = stmt_id_1;
@@ -205,7 +205,7 @@ MyASTConsumer::MyASTConsumer(ACTION action, const char *f,
   delete rv.ci;
 }
 
-bool MyASTConsumer::HandleTopLevelDecl(DeclGroupRef d)
+bool MutatorASTConsumer::HandleTopLevelDecl(DeclGroupRef d)
 {
   typedef DeclGroupRef::iterator iter;
 

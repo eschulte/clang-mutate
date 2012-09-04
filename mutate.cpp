@@ -83,8 +83,8 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  MyASTConsumer *astConsumer =
-    new MyASTConsumer(action, argv[2], stmt_id_1, stmt_id_2);
+  MutatorASTConsumer *astConsumer =
+    new MutatorASTConsumer(action, argv[2], stmt_id_1, stmt_id_2);
 
   return 0;
 }
