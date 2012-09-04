@@ -43,8 +43,8 @@
 namespace clang {
   enum ACTION { NUMBER, DELETE, INSERT, SWAP };
   
-  class MutatorASTVisitor
-    : public RecursiveASTVisitor<MutatorASTVisitor>
+  class MutatorASTVisitor : public ASTConsumer,
+                            public RecursiveASTVisitor<MutatorASTVisitor>
   {
   public:
     bool SelectStmt(Stmt *s);
@@ -63,7 +63,6 @@ namespace clang {
       bool stmt_set_1, stmt_set_2;
       unsigned int counter;
   };
-  /* class MutatorASTVisitor : public RecursiveASTVisitor<MutatorASTVisitor>; */
 
   class MutatorASTConsumer : public ASTConsumer
   {

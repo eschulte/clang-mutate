@@ -5,10 +5,15 @@
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
 #include "llvm/Support/CommandLine.h"
+#include "ASTMutator.h"
 
 using namespace clang::driver;
 using namespace clang::tooling;
+using namespace clang;
 using namespace llvm;
+
+ACTION parse_mut_op(StringRef MutOp);
+int parse_int_from(StringRef str, int *offset);
 
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static cl::extrahelp MoreHelp(
@@ -18,7 +23,7 @@ static cl::extrahelp MoreHelp(
     "\n"
 );
 
-cl::opt<std::string> MutOpt(
+cl::opt<std::string> MutOp(
   cl::Positional,
   cl::desc("<mut-op>"));
 
@@ -26,8 +31,32 @@ namespace {
 class ActionFactory {
 public:
   clang::ASTConsumer *newASTConsumer() {
-  errs() << "MutOpt: " << MutOpt << "\n";
-  return clang::CreateASTMutator(MutOpt);
+  ACTION action = parse_mut_op(MutOp);
+  int offset, stmt_id_1, stmt_id_2;
+  errs() << "MutOp: " << MutOp << "\n";
+
+  // Record the statement IDs
+  offset=2;
+  switch(action){
+  case DELETE:
+    stmt_id_1 = parse_int_from(MutOp, &offset); break;
+  case INSERT:
+  case SWAP:
+    stmt_id_1 = parse_int_from(MutOp, &offset);
+    stmt_id_2 = parse_int_from(MutOp, &offset);
+  default: break;
+  }
+  
+  switch(action){
+  case NUMBER: llvm::errs() << "numbering\n"; break;
+  case DELETE: llvm::errs() << "deleting " << stmt_id_1 << "\n"; break;
+  case INSERT: llvm::errs() << "copying "  << stmt_id_1 << " "
+                            << "to "       << stmt_id_2 << "\n"; break;
+  case SWAP:   llvm::errs() << "swapping " << stmt_id_1 << " "
+                            << "with "     << stmt_id_2 << "\n"; break;
+  }
+
+  return new clang::MutatorASTConsumer(action, "hello.c", stmt_id_1, stmt_id_2);
   }
 };
 }
@@ -40,78 +69,42 @@ int main(int argc, const char **argv) {
   return Tool.run(newFrontendActionFactory(&Factory));
 }
 
-//===----------------------------------------------------------------------===//
-//
-//  The following implements basic mutation operations over clang ASTs.
-//
-//===----------------------------------------------------------------------===//
+//-------------------------------------------------------------------
+// Support Functions
 
-class MyRecursiveASTVisitor
-    : public RecursiveASTVisitor<MyRecursiveASTVisitor>
-{
- public:
-  bool SelectStmt(Stmt *s);
-  void NumberStmt(Stmt *s);
-  void DeleteStmt(Stmt *s);
-  void   SaveStmt(Stmt *s);
-  bool  VisitStmt(Stmt *s);
-
-  Rewriter Rewrite;
-  CompilerInstance *ci;
-};
-
-bool MyRecursiveASTVisitor::SelectStmt(Stmt *s)
-{ return ! isa<DefaultStmt>(s); }
-
-void MyRecursiveASTVisitor::NumberStmt(Stmt *s)
-{
-  char label[24];
-  unsigned EndOff;
-  SourceLocation END = s->getLocEnd();
-
-  sprintf(label, "/* %d[ */", counter);
-  Rewrite.InsertText(s->getLocStart(), label, false);
-  sprintf(label, "/* ]%d */", counter);
-  
-  // Adjust the end offset to the end of the last token, instead of being the
-  // start of the last token.
-  EndOff = Lexer::MeasureTokenLength(END,
-                                     Rewrite.getSourceMgr(),
-                                     Rewrite.getLangOpts());
-
-  Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
+int parse_int_from(StringRef str, int *offset){
+  char buffer[12];
+  char c;
+  int i=-1;
+  do {
+    c = str[(*offset)];
+    ++(*offset);
+    ++i;
+  } while((c >= '0') && (c <= '9') && (buffer[i] = c));
+  buffer[i] = '\0';
+  if (i == 0)
+  {
+    llvm::errs() << "(additional) statement number required\n";
+    exit(EXIT_FAILURE);
+  }
+  return atoi(buffer);
 }
 
-void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
-{
-  char label[24];
-  if(counter == stmt_id_1) {
-    sprintf(label, "/* deleted:%d */", counter);
-    Rewrite.ReplaceText(s->getSourceRange(), label);
+ACTION parse_mut_op(StringRef MutOp){
+  switch(MutOp[0]){
+  case 'n': return NUMBER;
+  case 'd': return DELETE;
+  case 'i': return INSERT;
+  case 's': return SWAP;
+  default:
+    llvm::errs() <<
+      "Usage: mutate <action> <filename>\n"
+      "\n"
+      "Invalid action specified, use one of the following.\n"
+      "  n ------------ number all statements\n"
+      "  d:<n1> ------- delete the statement numbered n1\n"
+      "  i:<n1>:<n2> -- insert statement n1 before statement numbered n2\n"
+      "  s:<n1>:<n2> -- swap statements n1 and n2\n";
+    exit(EXIT_FAILURE);
   }
-}
-
-void MyRecursiveASTVisitor::SaveStmt(Stmt *s)
-{
-  if (counter == stmt_id_1) {
-    stmt_set_1 = true;
-    stmt1 = s;
-  }
-  if (counter == stmt_id_2) {
-    stmt_set_2 = true;
-    stmt2 = s;
-  }
-}
-
-bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
-  if (SelectStmt(s)) {
-    switch(action) {
-    case NUMBER: NumberStmt(s); break;
-    case DELETE: DeleteStmt(s); break;
-    case INSERT:
-    case SWAP:     SaveStmt(s); break;
-    }
-  }
-  counter++;
-  return true;
 }
