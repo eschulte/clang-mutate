@@ -28,7 +28,6 @@ int parse_int_from(char *str, int *offset){
   return atoi(buffer);
 }
 
-// TODO: figure out how to include search paths for libraries
 int main(int argc, char *argv[])
 {
   ACTION action;
@@ -59,6 +58,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
+  // Record the statement IDs
   if(action != NUMBER) {
     offset=2;
     stmt_id_1 = parse_int_from(argv[1], &offset);
