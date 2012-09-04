@@ -3,140 +3,29 @@
  * Adapted from the very good CIrewriter.cpp tutorial in
  * http://github.com/loarabia/Clang-tutorial
  */
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/ASTContext.h"
-#include "clang/AST/DeclBase.h"
-#include "clang/AST/DeclGroup.h"
-#include "clang/AST/Decl.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/AST/Type.h"
-#include "clang/Basic/Builtins.h"
-#include "clang/Basic/Diagnostic.h"
-#include "clang/Basic/FileManager.h"
-#include "clang/Basic/FileSystemOptions.h"
-#include "clang/Basic/IdentifierTable.h"
-#include "clang/Basic/LangOptions.h"
-#include "clang/Basic/SourceManager.h"
-#include "clang/Basic/TargetInfo.h"
-#include "clang/Basic/TargetOptions.h"
-#include "clang/Frontend/ASTConsumers.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/DiagnosticOptions.h"
-#include "clang/Frontend/FrontendOptions.h"
-#include "clang/Frontend/HeaderSearchOptions.h"
-#include "clang/Frontend/PreprocessorOptions.h"
-#include "clang/Frontend/TextDiagnosticPrinter.h"
-#include "clang/Frontend/Utils.h"
-#include "clang/Lex/HeaderSearch.h"
-#include "clang/Lex/Lexer.h"
-#include "clang/Lex/Preprocessor.h"
-#include "clang/Parse/ParseAST.h"
-#include "clang/Parse/Parser.h"
-#include "clang/Rewrite/Rewriter.h"
-#include "clang/Rewrite/Rewriters.h"
-#include "clang/Sema/Lookup.h"
-#include "clang/Sema/Ownership.h"
-#include "clang/Sema/Sema.h"
-#include "clang/Tooling/CommonOptionsParser.h"
-#include "clang/Tooling/Tooling.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Host.h"
-#include "llvm/Support/raw_ostream.h"
+#include "ASTMutator.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 
 using namespace clang;
 
-enum ACTION { NUMBER, DELETE, INSERT, SWAP };
-
-Stmt *stmt1, *stmt2;
-bool stmt_set_1, stmt_set_2 = false;
-unsigned int action, stmt_id_1, stmt_id_2;
-unsigned int counter = 0;
-
-class MyRecursiveASTVisitor
-    : public RecursiveASTVisitor<MyRecursiveASTVisitor>
-{
- public:
-  bool SelectStmt(Stmt *s);
-  void NumberStmt(Stmt *s);
-  void DeleteStmt(Stmt *s);
-  void   SaveStmt(Stmt *s);
-  bool  VisitStmt(Stmt *s);
-
-  Rewriter Rewrite;
-  CompilerInstance *ci;
-};
-
-bool MyRecursiveASTVisitor::SelectStmt(Stmt *s)
-{ return ! isa<DefaultStmt>(s); }
-
-void MyRecursiveASTVisitor::NumberStmt(Stmt *s)
-{
-  char label[24];
-  unsigned EndOff;
-  SourceLocation END = s->getLocEnd();
-
-  sprintf(label, "/* %d[ */", counter);
-  Rewrite.InsertText(s->getLocStart(), label, false);
-  sprintf(label, "/* ]%d */", counter);
-  
-  // Adjust the end offset to the end of the last token, instead of being the
-  // start of the last token.
-  EndOff = Lexer::MeasureTokenLength(END,
-                                     Rewrite.getSourceMgr(),
-                                     Rewrite.getLangOpts());
-
-  Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
-}
-
-void MyRecursiveASTVisitor::DeleteStmt(Stmt *s)
-{
-  char label[24];
-  if(counter == stmt_id_1) {
-    sprintf(label, "/* deleted:%d */", counter);
-    Rewrite.ReplaceText(s->getSourceRange(), label);
-  }
-}
-
-void MyRecursiveASTVisitor::SaveStmt(Stmt *s)
-{
-  if (counter == stmt_id_1) {
-    stmt_set_1 = true;
-    stmt1 = s;
-  }
-  if (counter == stmt_id_2) {
-    stmt_set_2 = true;
-    stmt2 = s;
-  }
-}
-
-bool MyRecursiveASTVisitor::VisitStmt(Stmt *s) {
-  if (SelectStmt(s)) {
-    switch(action) {
-    case NUMBER: NumberStmt(s); break;
-    case DELETE: DeleteStmt(s); break;
-    case INSERT:
-    case SWAP:     SaveStmt(s); break;
-    }
-  }
-  counter++;
-  return true;
-}
-
 class MyASTConsumer : public ASTConsumer
 {
  public:
-    MyASTConsumer(const char *f);
+    MyASTConsumer(ACTION action, const char *f, int stmt_id_1, int stmt_id_2);
     virtual bool HandleTopLevelDecl(DeclGroupRef d);
 
     MyRecursiveASTVisitor rv;
 };
 
-// TODO: use Tooling to do all of this stuff.
-MyASTConsumer::MyASTConsumer(const char *f)
+MyASTConsumer::MyASTConsumer(ACTION action, const char *f,
+                             int stmt_id_1, int stmt_id_2)
 {
+  rv.action = action;
+  rv.stmt_id_1 = stmt_id_1;
+  rv.stmt_id_2 = stmt_id_2;
+
   rv.ci = new CompilerInstance();
   rv.ci->createDiagnostics(0,NULL);
 
@@ -212,26 +101,27 @@ MyASTConsumer::MyASTConsumer(const char *f)
     std::string rep1, rep2;
     switch(action){
     case INSERT:
-      rep2 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
-      rv.Rewrite.InsertText(stmt1->getLocStart(), rep2, true);
+      rep2 = rv.Rewrite.getRewrittenText(rv.stmt2->getSourceRange());
+      rv.Rewrite.InsertText(rv.stmt1->getLocStart(), rep2, true);
       break;
     case SWAP:
-      rep1 = rv.Rewrite.getRewrittenText(stmt1->getSourceRange());
-      rep2 = rv.Rewrite.getRewrittenText(stmt2->getSourceRange());
-      rv.Rewrite.ReplaceText(stmt1->getSourceRange(), rep2);
-      rv.Rewrite.ReplaceText(stmt2->getSourceRange(), rep1);
+      rep1 = rv.Rewrite.getRewrittenText(rv.stmt1->getSourceRange());
+      rep2 = rv.Rewrite.getRewrittenText(rv.stmt2->getSourceRange());
+      rv.Rewrite.ReplaceText(rv.stmt1->getSourceRange(), rep2);
+      rv.Rewrite.ReplaceText(rv.stmt2->getSourceRange(), rep1);
       break;
+    default:
     }
 
     // Output file prefix
     outFile << "/* ";
     switch(action){
     case NUMBER: outFile << "numbered"; break;
-    case DELETE: outFile << "deleted "  << stmt_id_1; break;
-    case INSERT: outFile << "copying "  << stmt_id_1 << " "
-                         << "to "       << stmt_id_2; break;
-    case SWAP:   outFile << "swapping " << stmt_id_1 << " "
-                         << "with "     << stmt_id_2; break;
+    case DELETE: outFile << "deleted "  << rv.stmt_id_1; break;
+    case INSERT: outFile << "copying "  << rv.stmt_id_1 << " "
+                         << "to "       << rv.stmt_id_2; break;
+    case SWAP:   outFile << "swapping " << rv.stmt_id_1 << " "
+                         << "with "     << rv.stmt_id_2; break;
     }
     outFile << " using `mutate.cpp' */\n\n";
 
@@ -280,6 +170,8 @@ int parse_int_from(char *str, int *offset){
 // TODO: figure out how to include search paths for libraries
 int main(int argc, char *argv[])
 {
+  ACTION action;
+  unsigned int stmt_id_1, stmt_id_2;
   struct stat sb;
   int offset;
 
@@ -330,7 +222,8 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  MyASTConsumer *astConsumer = new MyASTConsumer(argv[2]);
+  MyASTConsumer *astConsumer =
+    new MyASTConsumer(action, argv[2], stmt_id_1, stmt_id_2);
 
   return 0;
 }

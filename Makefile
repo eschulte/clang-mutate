@@ -4,8 +4,9 @@ RTTIFLAG := -fno-rtti
 CXXFLAGS := $(shell llvm-config --cxxflags) $(RTTIFLAG)
 LLVMLDFLAGS := $(shell llvm-config --ldflags --libs $(LLVMCOMPONENTS))
 
-SOURCES = mutate.cpp clang-mutate.cpp
+SOURCES = mutate.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
+BASE_OBJECTS = ASTMutator.o
 EXES = $(OBJECTS:.o=)
 CLANGLIBS = \
 	-lclangFrontend \
@@ -25,11 +26,11 @@ CLANGLIBS = \
 all: $(OBJECTS) $(EXES)
 .PHONY: clean check
 
-%: %.o
-	$(CXX) -o $@ $< $(CLANGLIBS) $(LLVMLDFLAGS)
+%: $(BASE_OBJECTS) %.o
+	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
 
 clean:
-	-rm -f $(EXES) $(OBJECTS) compile_commands.json a.out hello*_* *~
+	-rm -f $(EXES) $(OBJECTS) $(BASE_OBJECTS) compile_commands.json a.out hello*_* *~
 
 compile_commands.json:
 	echo -e "[\n\
