@@ -4,7 +4,7 @@ RTTIFLAG := -fno-rtti
 CXXFLAGS := $(shell llvm-config --cxxflags) $(RTTIFLAG)
 LLVMLDFLAGS := $(shell llvm-config --ldflags --libs $(LLVMCOMPONENTS))
 
-SOURCES = mutate.cpp mutate2.cpp
+SOURCES = mutate.cpp mutate2.cpp clang-mutate.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 EXES = $(OBJECTS:.o=)
 CLANGLIBS = \
@@ -32,6 +32,9 @@ mutate: ASTMutator.o mutate.o
 	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
 
 mutate2: ASTMutator.o mutate2.o
+	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
+
+clang-mutate: ASTMutate.o clang-mutate.o
 	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
 
 clean:
