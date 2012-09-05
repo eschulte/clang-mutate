@@ -11,7 +11,19 @@ http://clang.llvm.org/docs/RAVFrontendAction.html
 Clang tools depend on the existence of Compilation Databases.
 http://clang.llvm.org/docs/JSONCompilationDatabase.html
 
-* Notes and Issues
+* Notes Issues and Tasks [2/3]
+** TODO nesting of numbered statements
+Ensure that the numbers are applied from the outside-in rather than
+the inside out, e.g., in the following =/* 1[ */= should be before
+both =/* 2[ */= and =/* 3[ */=.
+
+: /* numbered using clang-mutate */
+: int main(int argc, char *argv[])
+: /* 0[ */{
+:   /* 3[ *//* 2[ *//* 1[ */puts/* ]2 *//* ]3 */(/* 5[ *//* 4[ */"hello"/* ]4 *//* ]5 */)/* ]1 */;
+:   /* 6[ */return /* 7[ */0/* ]6 *//* ]7 */;
+: }/* ]0 */
+
 ** known working versions of LLVM and Clang
 LLVM
 : Path: .
