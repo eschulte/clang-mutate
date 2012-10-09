@@ -27,13 +27,15 @@ using namespace llvm;
 
 static cl::extrahelp CommonHelp(CommonOptionsParser::HelpMessage);
 static cl::extrahelp MoreHelp(
-    "\tFor example, to number all statements in a file, use:\n"
+    "Example Usage:\n"
     "\n"
-    "\t  ./mutate2 -number file.c\n"
+    "\tto number all statements in a file, use:\n"
+    "\n"
+    "\t  ./clang-mutate -number file.c\n"
     "\n"
     "\tor to delete the 12th statement, use:\n"
     "\n"
-    "\t  ./mutate2 -delete -stmt1=12 file.c\n"
+    "\t  ./clang-mutate -delete -stmt1=12 file.c\n"
     "\n"
 );
 
