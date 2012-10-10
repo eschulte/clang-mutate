@@ -115,8 +115,8 @@ namespace {
         case INSERT:
         case SWAP:     SaveStmt(s); break;
         }
+        Counter++;
       }
-      Counter++;
       return true;
     }
 
