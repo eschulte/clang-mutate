@@ -38,6 +38,7 @@ namespace {
       TranslationUnitDecl *D = Context.getTranslationUnitDecl();
       // Setup
       Counter=0;
+      mainFileID=Context.getSourceManager().getMainFileID();
       Rewrite.setSourceMgr(Context.getSourceManager(),
                            Context.getLangOpts());
       // Run Recursive AST Visitor
@@ -62,7 +63,10 @@ namespace {
     Rewriter Rewrite;
 
     bool SelectStmt(Stmt *s)
-    { return ! isa<DefaultStmt>(s); }
+    {
+      FullSourceLoc loc = FullSourceLoc(s->getLocEnd(), Rewrite.getSourceMgr());
+      return ( ! isa<DefaultStmt>(s) && (loc.getFileID() == mainFileID));
+    }
 
     void NumberStmt(Stmt *s)
     {
@@ -143,6 +147,7 @@ namespace {
     ACTION Action;
     int Stmt1, Stmt2;
     unsigned int Counter;
+    FileID mainFileID;
     SourceRange Range1, Range2;
     std::string Rewritten1, Rewritten2;
   };
