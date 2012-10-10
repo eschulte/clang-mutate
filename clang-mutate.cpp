@@ -33,13 +33,18 @@ static cl::extrahelp MoreHelp(
     "\n"
     "\t  ./clang-mutate -number file.c\n"
     "\n"
-    "\tor to delete the 12th statement, use:\n"
+    "\tto count statement IDs, use:\n"
+    "\n"
+    "\t  ./clang-mutate -ids file.c\n"
+    "\n"
+    "\tor to delete the statement with ID=12, use:\n"
     "\n"
     "\t  ./clang-mutate -delete -stmt1=12 file.c\n"
     "\n"
 );
 
 static cl::opt<bool> Number("number", cl::desc("number all statements"));
+static cl::opt<bool>    Ids("ids",    cl::desc("print count of statement ids"));
 static cl::opt<bool> Delete("delete", cl::desc("delete stmt1"));
 static cl::opt<bool> Insert("insert", cl::desc("copy stmt1 to after stmt2"));
 static cl::opt<bool>   Swap("swap",   cl::desc("Swap stmt1 and stmt2"));
@@ -52,13 +57,15 @@ public:
   clang::ASTConsumer *newASTConsumer() {
     if (Number)
       return clang::CreateASTNumberer();
+    if (Ids)
+      return clang::CreateASTIDS();
     if (Delete)
       return clang::CreateASTDeleter(Stmt1);
     if (Insert)
       return clang::CreateASTInserter(Stmt1, Stmt2);
     if (Swap)
       return clang::CreateASTSwapper(Stmt1, Stmt2);
-    errs() << "Must supply one of the [number,delete,insert,swap] options.\n";
+    errs() << "Must supply one of [number,ids,delete,insert,swap].\n";
     exit(EXIT_FAILURE);
   }
 };

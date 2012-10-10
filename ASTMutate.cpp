@@ -118,6 +118,7 @@ namespace {
         case DELETE: DeleteStmt(s); break;
         case INSERT:
         case SWAP:     SaveStmt(s); break;
+        case IDS: break;
         }
         Counter++;
       }
@@ -126,19 +127,24 @@ namespace {
 
     void OutputRewritten(ASTContext &Context) {
       // Output file prefix
-      Out << "/* ";
+      if(Action != IDS) Out << "/* ";
       switch(Action){
       case NUMBER: Out << "numbered"; break;
       case DELETE: Out << "deleted "  << Stmt1; break;
       case INSERT: Out << "copying "  << Stmt1 << " to "   << Stmt2; break;
       case SWAP:   Out << "swapping " << Stmt1 << " with " << Stmt2; break;
+      case IDS: break;
       }
-      Out << " using clang-mutate */\n";
+      if(Action != IDS) Out << " using clang-mutate */\n";
 
-      // Now output rewritten source code
-      const RewriteBuffer *RewriteBuf = 
-        Rewrite.getRewriteBufferFor(Context.getSourceManager().getMainFileID());
-      Out << std::string(RewriteBuf->begin(), RewriteBuf->end());
+      // Now output rewritten source code or ID count
+      if(Action == IDS){
+        Out << Counter << "\n";
+      } else {
+        const RewriteBuffer *RewriteBuf = 
+          Rewrite.getRewriteBufferFor(Context.getSourceManager().getMainFileID());
+        Out << std::string(RewriteBuf->begin(), RewriteBuf->end());
+      }
     }
     
   private:
@@ -155,6 +161,10 @@ namespace {
 
 ASTConsumer *clang::CreateASTNumberer(){
   return new ASTMutator(0, /*Dump=*/ true, NUMBER, -1, -1);
+}
+
+ASTConsumer *clang::CreateASTIDS(){
+  return new ASTMutator(0, /*Dump=*/ true, IDS, -1, -1);
 }
 
 ASTConsumer *clang::CreateASTDeleter(int Stmt){
