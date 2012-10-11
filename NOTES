@@ -11,7 +11,11 @@ http://clang.llvm.org/docs/RAVFrontendAction.html
 Clang tools depend on the existence of Compilation Databases.
 http://clang.llvm.org/docs/JSONCompilationDatabase.html
 
-* Notes Issues and Tasks [2/3]
+* Notes Issues and Tasks [2/4]
+** TODO better selection of AST nodes to visit
+- what can we visit http://clang.llvm.org/docs/RAVFrontendAction.html
+- lets not visit tiny statements
+
 ** TODO nesting of numbered statements
 Ensure that the numbers are applied from the outside-in rather than
 the inside out, e.g., in the following =/* 1[ */= should be before
