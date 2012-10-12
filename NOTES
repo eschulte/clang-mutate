@@ -93,3 +93,12 @@ replacing clang-check with mutation-tool in the above works
 : lib/Sema/SemaStmtAsm.cpp:      TargetParser(TheTarget->createMCAsmParser(*STI, *Parser));
 : tools/driver/cc1as_main.cpp:  OwningPtr<MCAsmParser> Parser(createMCAsmParser(SrcMgr, Ctx,
 : tools/driver/cc1as_main.cpp:  OwningPtr<MCTargetAsmParser> TAP(TheTarget->createMCAsmParser(*STI, *Parser));
+
+** TODO delete semicolons
+Could check if next token is semicolon and remove it depending on the
+context.  Alternately maybe clang has a transform which removed
+superfluous semicolons.
+
+Probably want to break the range up into Beg and End, then move the
+End.  Look in earlier versions of the code for comments in DeleteStmt
+and possibly a partial implementation.
