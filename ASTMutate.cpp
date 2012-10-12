@@ -119,6 +119,28 @@ namespace {
       }
     }
 
+    bool VisitStmt(Stmt *s){
+      switch (s->getStmtClass()){
+      case Stmt::NoStmtClass:
+      case Stmt::DefaultStmtClass:
+      case Stmt::AtomicExprClass:
+      case Stmt::IntegerLiteralClass:
+      case Stmt::FloatingLiteralClass:
+      case Stmt::ImaginaryLiteralClass:
+      case Stmt::StringLiteralClass:
+      case Stmt::CharacterLiteralClass:
+      case Stmt::CXXBoolLiteralExprClass:
+      case Stmt::CXXNullPtrLiteralExprClass:
+      case Stmt::ObjCStringLiteralClass:
+      case Stmt::ObjCBoolLiteralExprClass:
+      case Stmt::UserDefinedLiteralClass:
+        break;
+      default:
+        VisitRange(s->getSourceRange());
+      }
+      return true;
+    }
+
     //// from AST/EvaluatedExprVisitor.h
     // VISIT(VisitDeclRefExpr(DeclRefExpr *element));
     // VISIT(VisitOffsetOfExpr(OffsetOfExpr *element));
@@ -131,7 +153,7 @@ namespace {
     // VISIT(VisitChooseExpr(ChooseExpr *element));
     // VISIT(VisitDesignatedInitExpr(DesignatedInitExpr *element));
     // VISIT(VisitCXXTypeidExpr(CXXTypeidExpr *element));
-    VISIT(VisitStmt(Stmt *element));
+    // VISIT(VisitStmt(Stmt *element));
 
     //// from Analysis/Visitors/CFGRecStmtDeclVisitor.h
     // VISIT(VisitDeclRefExpr(DeclRefExpr *element)); // <- duplicate above
