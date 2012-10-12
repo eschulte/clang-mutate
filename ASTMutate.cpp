@@ -62,20 +62,20 @@ namespace {
     
     Rewriter Rewrite;
 
-    bool SelectStmt(Stmt *s)
+    bool SelectRange(SourceRange r)
     {
-      FullSourceLoc loc = FullSourceLoc(s->getLocEnd(), Rewrite.getSourceMgr());
-      return ( ! isa<DefaultStmt>(s) && (loc.getFileID() == mainFileID));
+      FullSourceLoc loc = FullSourceLoc(r.getEnd(), Rewrite.getSourceMgr());
+      return (loc.getFileID() == mainFileID);
     }
 
-    void NumberStmt(Stmt *s)
+    void NumberRange(SourceRange r)
     {
       char label[24];
       unsigned EndOff;
-      SourceLocation END = s->getLocEnd();
+      SourceLocation END = r.getEnd();
 
       sprintf(label, "/* %d[ */", Counter);
-      Rewrite.InsertText(s->getLocStart(), label, false);
+      Rewrite.InsertText(r.getBegin(), label, false);
       sprintf(label, "/* ]%d */", Counter);
   
       // Adjust the end offset to the end of the last token, instead
@@ -87,43 +87,59 @@ namespace {
       Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
     }
 
-    void DeleteStmt(Stmt *s)
+    void DeleteRange(SourceRange r)
     {
       char label[24];
-      // TODO: Could check if next token is semicolon and remove it
-      //       depending on the context.  Alternately maybe clang has
-      //       a transform which removed superfluous semicolons.
-      //       
-      // SourceLocation Beg = s->getLocStart();
-      // SourceLocation End = s->getLocEnd();
       if(Counter == Stmt1) {
         sprintf(label, "/* deleted:%d */", Counter);
-        // Rewrite.ReplaceText(SourceRange(Beg,End), label);
-        Rewrite.ReplaceText(s->getSourceRange(), label);
+        Rewrite.ReplaceText(r, label);
       }
     }
 
-    void SaveStmt(Stmt *s)
+    void SaveRange(SourceRange r)
     {
-      if (Counter == Stmt1)
-        Range1 = s->getSourceRange();
-      if (Counter == Stmt2)
-        Range2 = s->getSourceRange();
+      if (Counter == Stmt1) Range1 = r;
+      if (Counter == Stmt2) Range2 = r;
     }
 
-    bool VisitStmt(Stmt *s) {
-      if (SelectStmt(s)) {
+    void VisitRange(SourceRange r){
+      if (SelectRange(r)) {
         switch(Action) {
-        case NUMBER: NumberStmt(s); break;
-        case DELETE: DeleteStmt(s); break;
+        case NUMBER: NumberRange(r); break;
+        case DELETE: DeleteRange(r); break;
         case INSERT:
-        case SWAP:     SaveStmt(s); break;
+        case SWAP:     SaveRange(r); break;
         case IDS: break;
         }
         Counter++;
       }
+    }
+
+    bool VisitStmt(Stmt *s) {
+      VisitRange(s->getSourceRange());
       return true;
     }
+
+    bool VisitCXXRecordDecl(CXXRecordDecl *d) {
+      VisitRange(d->getSourceRange());
+      return true;
+    }
+
+    bool VisitDeclStmt(DeclStmt *d){
+      VisitRange(d->getSourceRange());
+      return true;
+    }
+
+    bool VisitDeclRefExpr(DeclRefExpr *d){
+      VisitRange(d->getSourceRange());
+      return true;
+    }
+
+    // Causes assertion failure.
+    // bool VisitDecl(Decl *d) {
+    //   VisitRange(d->getSourceRange());
+    //   return true;
+    // }
 
     void OutputRewritten(ASTContext &Context) {
       // output rewritten source code or ID count
