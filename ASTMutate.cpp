@@ -120,28 +120,28 @@ namespace {
     }
 
     //// from AST/EvaluatedExprVisitor.h
-    VISIT(VisitDeclRefExpr(DeclRefExpr *element));
-    VISIT(VisitOffsetOfExpr(OffsetOfExpr *element));
-    VISIT(VisitUnaryExprOrTypeTraitExpr(UnaryExprOrTypeTraitExpr *element));
-    VISIT(VisitExpressionTraitExpr(ExpressionTraitExpr *element));
-    VISIT(VisitBlockExpr(BlockExpr *element));
-    VISIT(VisitCXXUuidofExpr(CXXUuidofExpr *element));
-    VISIT(VisitCXXNoexceptExpr(CXXNoexceptExpr *element));
-    VISIT(VisitMemberExpr(MemberExpr *element));
-    VISIT(VisitChooseExpr(ChooseExpr *element));
-    VISIT(VisitDesignatedInitExpr(DesignatedInitExpr *element));
-    VISIT(VisitCXXTypeidExpr(CXXTypeidExpr *element));
+    // VISIT(VisitDeclRefExpr(DeclRefExpr *element));
+    // VISIT(VisitOffsetOfExpr(OffsetOfExpr *element));
+    // VISIT(VisitUnaryExprOrTypeTraitExpr(UnaryExprOrTypeTraitExpr *element));
+    // VISIT(VisitExpressionTraitExpr(ExpressionTraitExpr *element));
+    // VISIT(VisitBlockExpr(BlockExpr *element));
+    // VISIT(VisitCXXUuidofExpr(CXXUuidofExpr *element));
+    // VISIT(VisitCXXNoexceptExpr(CXXNoexceptExpr *element));
+    // VISIT(VisitMemberExpr(MemberExpr *element));
+    // VISIT(VisitChooseExpr(ChooseExpr *element));
+    // VISIT(VisitDesignatedInitExpr(DesignatedInitExpr *element));
+    // VISIT(VisitCXXTypeidExpr(CXXTypeidExpr *element));
     VISIT(VisitStmt(Stmt *element));
 
     //// from Analysis/Visitors/CFGRecStmtDeclVisitor.h
-    // VISIT(VisitDeclRefExpr(DeclRefExpr *element)); // <- duplicate
-    VISIT(VisitDeclStmt(DeclStmt *element));
+    // VISIT(VisitDeclRefExpr(DeclRefExpr *element)); // <- duplicate above
+    // VISIT(VisitDeclStmt(DeclStmt *element));
     // VISIT(VisitDecl(Decl *element)); // <- throws assertion error
-    VISIT(VisitCXXRecordDecl(CXXRecordDecl *element));
-    VISIT(VisitChildren(Stmt *element));
-    // VISIT(VisitStmt(Stmt *element)); // <- duplicate
-    VISIT(VisitCompoundStmt(CompoundStmt *element));
-    VISIT(VisitConditionVariableInit(Stmt *element));
+    // VISIT(VisitCXXRecordDecl(CXXRecordDecl *element));
+    // VISIT(VisitChildren(Stmt *element));
+    // VISIT(VisitStmt(Stmt *element)); // <- duplicate above
+    // VISIT(VisitCompoundStmt(CompoundStmt *element));
+    // VISIT(VisitConditionVariableInit(Stmt *element));
 
     void OutputRewritten(ASTContext &Context) {
       // output rewritten source code or ID count
