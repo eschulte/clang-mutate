@@ -126,18 +126,7 @@ namespace {
     }
 
     void OutputRewritten(ASTContext &Context) {
-      // Output file prefix
-      if(Action != IDS) Out << "/* ";
-      switch(Action){
-      case NUMBER: Out << "numbered"; break;
-      case DELETE: Out << "deleted "  << Stmt1; break;
-      case INSERT: Out << "copying "  << Stmt1 << " to "   << Stmt2; break;
-      case SWAP:   Out << "swapping " << Stmt1 << " with " << Stmt2; break;
-      case IDS: break;
-      }
-      if(Action != IDS) Out << " using clang-mutate */\n";
-
-      // Now output rewritten source code or ID count
+      // output rewritten source code or ID count
       if(Action == IDS){
         Out << Counter << "\n";
       } else {
