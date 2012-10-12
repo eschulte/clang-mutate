@@ -10,3 +10,7 @@ hello-no-include
 *_del.c
 *_ins.c
 *_swp.c
+*-num.c
+*-del.c
+*-ins.c
+*-swp.c

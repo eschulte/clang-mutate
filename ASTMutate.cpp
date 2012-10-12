@@ -20,6 +20,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
+
+#define VISIT(func) \
+  bool func { VisitRange(element->getSourceRange()); return true; }
+
 using namespace clang;
 
 namespace {
@@ -115,31 +119,29 @@ namespace {
       }
     }
 
-    bool VisitStmt(Stmt *s) {
-      VisitRange(s->getSourceRange());
-      return true;
-    }
+    //// from AST/EvaluatedExprVisitor.h
+    VISIT(VisitDeclRefExpr(DeclRefExpr *element));
+    VISIT(VisitOffsetOfExpr(OffsetOfExpr *element));
+    VISIT(VisitUnaryExprOrTypeTraitExpr(UnaryExprOrTypeTraitExpr *element));
+    VISIT(VisitExpressionTraitExpr(ExpressionTraitExpr *element));
+    VISIT(VisitBlockExpr(BlockExpr *element));
+    VISIT(VisitCXXUuidofExpr(CXXUuidofExpr *element));
+    VISIT(VisitCXXNoexceptExpr(CXXNoexceptExpr *element));
+    VISIT(VisitMemberExpr(MemberExpr *element));
+    VISIT(VisitChooseExpr(ChooseExpr *element));
+    VISIT(VisitDesignatedInitExpr(DesignatedInitExpr *element));
+    VISIT(VisitCXXTypeidExpr(CXXTypeidExpr *element));
+    VISIT(VisitStmt(Stmt *element));
 
-    bool VisitCXXRecordDecl(CXXRecordDecl *d) {
-      VisitRange(d->getSourceRange());
-      return true;
-    }
-
-    bool VisitDeclStmt(DeclStmt *d){
-      VisitRange(d->getSourceRange());
-      return true;
-    }
-
-    bool VisitDeclRefExpr(DeclRefExpr *d){
-      VisitRange(d->getSourceRange());
-      return true;
-    }
-
-    // Causes assertion failure.
-    // bool VisitDecl(Decl *d) {
-    //   VisitRange(d->getSourceRange());
-    //   return true;
-    // }
+    //// from Analysis/Visitors/CFGRecStmtDeclVisitor.h
+    // VISIT(VisitDeclRefExpr(DeclRefExpr *element)); // <- duplicate
+    VISIT(VisitDeclStmt(DeclStmt *element));
+    // VISIT(VisitDecl(Decl *element)); // <- throws assertion error
+    VISIT(VisitCXXRecordDecl(CXXRecordDecl *element));
+    VISIT(VisitChildren(Stmt *element));
+    // VISIT(VisitStmt(Stmt *element)); // <- duplicate
+    VISIT(VisitCompoundStmt(CompoundStmt *element));
+    VISIT(VisitConditionVariableInit(Stmt *element));
 
     void OutputRewritten(ASTContext &Context) {
       // output rewritten source code or ID count
