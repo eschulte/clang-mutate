@@ -106,8 +106,52 @@ namespace {
       if (Counter == Stmt2) Range2 = r;
     }
 
+    // This function adapted from clang/lib/ARCMigrate/Transforms.cpp
+    SourceLocation findSemiAfterLocation(SourceLocation loc) {
+      SourceManager &SM = Rewrite.getSourceMgr();
+      if (loc.isMacroID()) {
+        if (!Lexer::isAtEndOfMacroExpansion(loc, SM,
+                                            Rewrite.getLangOpts(), &loc))
+          return SourceLocation();
+      }
+      loc = Lexer::getLocForEndOfToken(loc, /*Offset=*/0, SM,
+                                       Rewrite.getLangOpts());
+
+      // Break down the source location.
+      std::pair<FileID, unsigned> locInfo = SM.getDecomposedLoc(loc);
+
+      // Try to load the file buffer.
+      bool invalidTemp = false;
+      StringRef file = SM.getBufferData(locInfo.first, &invalidTemp);
+      if (invalidTemp)
+        return SourceLocation();
+
+      const char *tokenBegin = file.data() + locInfo.second;
+
+      // Lex from the start of the given location.
+      Lexer lexer(SM.getLocForStartOfFile(locInfo.first),
+                  Rewrite.getLangOpts(),
+                  file.begin(), tokenBegin, file.end());
+      Token tok;
+      lexer.LexFromRawLexer(tok);
+      if (tok.isNot(tok::semi))
+        return SourceLocation();
+
+      return tok.getLocation();
+    }
+
+    SourceRange expandRange(SourceRange r){
+      // If the range is a full statement, and is followed by a
+      // semi-colon then expand the range to include the semicolon.
+      SourceLocation b = r.getBegin();
+      SourceLocation e = findSemiAfterLocation(r.getEnd());
+      if (e.isInvalid()) e = r.getEnd();
+      return SourceRange(b,e);
+    }
+
     void VisitRange(SourceRange r){
       if (SelectRange(r)) {
+        r = expandRange(r);
         switch(Action) {
         case NUMBER: NumberRange(r); break;
         case DELETE: DeleteRange(r); break;
