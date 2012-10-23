@@ -17,6 +17,8 @@ interface, which means that the clang-mutate executable works best
 when copied to the same directory as the clang executable.  Running
 "make install" will do this for you.
 
+[1] http://clang.llvm.org/docs/LibTooling.html
+
 For example,
 
     $ cat etc/hello.c
@@ -29,35 +31,66 @@ For example,
 
     $ clang-mutate -ids etc/hello.c --
     Processing: hello.c.
-    8
+    9
 
     $ clang-mutate -number etc/hello.c --
     Processing: hello.c.
-    /* numbered using clang-mutate */
     #include <stdio.h>
     int main(int argc, char *argv[])
     /* 0[ */{
-      /* 3[ *//* 2[ *//* 1[ */puts/* ]2 *//* ]3 */(/* 5[ *//* 4[ */"hello"/* ]4 *//* ]5 */)/* ]1 */;
-      /* 6[ */return /* 7[ */0/* ]6 *//* ]7 */;
+      /* 3[ *//* 2[ *//* 1[ */puts/* ]2 *//* ]3 */(/* 6[ *//* 5[ *//* 4[ */"hello"/* ]4 *//* ]5 *//* ]6 */);/* ]1 */
+      /* 7[ */return /* 8[ */0;/* ]7 *//* ]8 */
     }/* ]0 */
 
-    $ clang-mutate -delete -stmt1=6 etc/hello.c --
+    $ clang-mutate -delete -stmt1=7 etc/hello.c --
     Processing: hello.c.
-    /* deleted 6 using clang-mutate */
     #include <stdio.h>
     int main(int argc, char *argv[])
     {
       puts("hello");
-      /* deleted:6 */;
+      /* deleted:7 */;
     }
 
-    $ clang-mutate -set -stmt1=4 -value="'good bye'" etc/hello.c --
+    $ clang-mutate -set -stmt1=5 -value='"good bye"' etc/hello.c --
     Processing: /home/eschulte/src/clang-mutate/hello.c.
     #include <stdio.h>
     int main(int argc, char *argv[])
     {
-      puts('good bye');
+      puts("good bye");
       return 0;
     }
 
-[1] http://clang.llvm.org/docs/LibTooling.html
+or we can remove loop executions using tools/perforate-loops script,
+
+    $ make etc/loop
+    cc     etc/loop.c   -o etc/loop
+    $ ./etc/loop
+    hello 0
+    hello 1
+    hello 2
+    hello 3
+    hello 4
+    hello 5
+    hello 6
+    hello 7
+    hello 8
+    hello 9
+    $ ./tools/perforate-loops etc/loop.c > /tmp/faster.c
+    $ make /tmp/faster
+    cc     /tmp/faster.c   -o /tmp/faster
+    $ /tmp/faster
+    hello 0
+    hello 2
+    hello 4
+    hello 6
+    hello 8
+
+or replace string literals using tools/strings-to.
+
+    $ ./tools/strings-to etc/hello.c foo
+    #include <stdio.h>
+    int main(int argc, char *argv[])
+    {
+      puts("foo");
+      return 0;
+    }

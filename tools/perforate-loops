@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+# Usage: perforate-loops file [factor]
+# perforate all loops in FILE by an optional FACTOR (default=2)
+#
+# For more information on loop perforation see the following.
+#
+#   @article{misailovic2011probabilistically,
+#     author={Misailovic, S. and Roy, D.M. and Martin Rinard},
+#     title={Probabilistically accurate program transformations},
+#     journal={Static Analysis},
+#     year={2011},
+#     pages={316--333}
+#   }
+# 
+clang_mutate(){ clang-mutate $@ --|tail -n +2; }
+FILE="$(cat "$1")"
+if [ -z "$2" ];then FACTOR=2;else FACTOR=$2;fi
+TMP="/tmp/clang_mutate_script_${RANDOM}.c"
+LIST="$(clang_mutate -list $1)"
+offset=0
+
+# For every ForStmt in the original program
+IFS="
+"
+for FOR in $(echo "$LIST"|grep ForStmt);do
+    # If ∃ a UnaryOperator on the same line
+    LINE=$(echo "$FOR"|awk '{print $2}'|sed 's/:.*$//')
+    ID=$(echo "$LIST"|grep UnaryOperator|grep "$LINE:"|awk '{print $1}')
+    if [ ! -z "$ID" ];then
+        echo "$FILE" > $TMP
+        # if the STMT is a ++ or --
+        STMT="$(clang_mutate -get -stmt1=$ID $TMP)"
+        if $(echo "$STMT"|grep "\(\+\+\|--\)$">/dev/null);then
+            # perforate that For loop
+            NEW="$(echo "$STMT"|sed 's/..$//')+=$FACTOR"
+            # echo "$STMT -> $NEW"
+            FILE="$(clang_mutate -set -stmt1=$ID -value="$NEW" $TMP)"
+            offset=$(echo "$offset + 1"|bc)
+        fi
+    fi
+done
+
+rm $TMP
+echo "$FILE"

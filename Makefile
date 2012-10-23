@@ -32,7 +32,7 @@ clang-mutate: ASTMutate.o clang-mutate.o
 	$(CXX) -o $@ $^ $(CLANGLIBS) $(LLVMLDFLAGS)
 
 clean:
-	-rm -f $(EXES) $(OBJECTS) ASTMutate.o compile_commands.json a.out etc/hello *~
+	-rm -f $(EXES) $(OBJECTS) ASTMutate.o compile_commands.json a.out etc/hello etc/loop *~
 
 install: clang-mutate
 	cp $< $$(dirname $$(which clang))
