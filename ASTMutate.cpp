@@ -206,18 +206,6 @@ namespace {
     bool VisitStmt(Stmt *s){
       switch (s->getStmtClass()){
       case Stmt::NoStmtClass:
-      case Stmt::DefaultStmtClass:
-      case Stmt::AtomicExprClass:
-      case Stmt::IntegerLiteralClass:
-      case Stmt::FloatingLiteralClass:
-      case Stmt::ImaginaryLiteralClass:
-      case Stmt::StringLiteralClass:
-      case Stmt::CharacterLiteralClass:
-      case Stmt::CXXBoolLiteralExprClass:
-      case Stmt::CXXNullPtrLiteralExprClass:
-      case Stmt::ObjCStringLiteralClass:
-      case Stmt::ObjCBoolLiteralExprClass:
-      case Stmt::UserDefinedLiteralClass:
         break;
       default:
         SourceRange r = expandRange(s->getSourceRange());
