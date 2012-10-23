@@ -113,21 +113,26 @@ namespace {
 
     void ListStmt(Stmt *s)
     {
+      char label[9];
       SourceManager &SM = Rewrite.getSourceMgr();
       PresumedLoc PLoc;
 
-      Out << Counter
-          << " "
-          << s->getStmtClassName()
-          << " ";
-
-      PLoc = SM.getPresumedLoc(s->getSourceRange().getEnd());
-      Out << PLoc.getLine() << ":" << PLoc.getColumn() << " ";
+      sprintf(label, "%8d", Counter);
+      Out << label << " ";
 
       PLoc = SM.getPresumedLoc(s->getSourceRange().getBegin());
-      Out << PLoc.getLine() << ":" << PLoc.getColumn() << " ";
+      sprintf(label, "%6d", PLoc.getLine());
+      Out << label << ":";
+      sprintf(label, "%-3d", PLoc.getColumn());
+      Out << label << " ";
 
-      Out << PLoc.getFilename() << "\n";
+      PLoc = SM.getPresumedLoc(s->getSourceRange().getEnd());
+      sprintf(label, "%6d", PLoc.getLine());
+      Out << label << ":";
+      sprintf(label, "%-3d", PLoc.getColumn());
+      Out << label << " ";
+
+      Out << s->getStmtClassName() << "\n";
     }
 
     void DeleteRange(SourceRange r)
