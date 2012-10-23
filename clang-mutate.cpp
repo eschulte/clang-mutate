@@ -43,13 +43,14 @@ static cl::extrahelp MoreHelp(
     "\n"
 );
 
-static cl::opt<bool> Number("number", cl::desc("number all statements"));
-static cl::opt<bool>    Ids("ids",    cl::desc("print count of statement ids"));
-static cl::opt<bool> Delete("delete", cl::desc("delete stmt1"));
-static cl::opt<bool> Insert("insert", cl::desc("copy stmt1 to after stmt2"));
-static cl::opt<bool>   Swap("swap",   cl::desc("Swap stmt1 and stmt2"));
-static cl::opt<int>   Stmt1("stmt1",  cl::desc("statement 1 for mutation ops"));
-static cl::opt<int>   Stmt2("stmt2",  cl::desc("statement 2 for mutation ops"));
+static cl::opt<bool>   Number("number",   cl::desc("number all statements"));
+static cl::opt<bool>      Ids("ids",      cl::desc("print count of statement ids"));
+static cl::opt<bool> Annotate("annotate", cl::desc("annotate each statement with its class"));
+static cl::opt<bool>   Delete("delete",   cl::desc("delete stmt1"));
+static cl::opt<bool>   Insert("insert",   cl::desc("copy stmt1 to after stmt2"));
+static cl::opt<bool>     Swap("swap",     cl::desc("Swap stmt1 and stmt2"));
+static cl::opt<int>     Stmt1("stmt1",    cl::desc("statement 1 for mutation ops"));
+static cl::opt<int>     Stmt2("stmt2",    cl::desc("statement 2 for mutation ops"));
 
 namespace {
 class ActionFactory {
@@ -59,6 +60,8 @@ public:
       return clang::CreateASTNumberer();
     if (Ids)
       return clang::CreateASTIDS();
+    if (Annotate)
+      return clang::CreateASTAnnotator();
     if (Delete)
       return clang::CreateASTDeleter(Stmt1);
     if (Insert)

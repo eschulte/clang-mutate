@@ -91,6 +91,26 @@ namespace {
       Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
     }
 
+    void AnnotateStmt(Stmt *s)
+    {
+      char label[128];
+      unsigned EndOff;
+      SourceRange r = s->getSourceRange();
+      SourceLocation END = r.getEnd();
+
+      sprintf(label, "/* %d:%s[ */", Counter, s->getStmtClassName());
+      Rewrite.InsertText(r.getBegin(), label, false);
+      sprintf(label, "/* ]%d */", Counter);
+
+      // Adjust the end offset to the end of the last token, instead
+      // of being the start of the last token.
+      EndOff = Lexer::MeasureTokenLength(END,
+                                         Rewrite.getSourceMgr(),
+                                         Rewrite.getLangOpts());
+
+      Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
+    }
+
     void DeleteRange(SourceRange r)
     {
       char label[24];
@@ -153,11 +173,14 @@ namespace {
       if (SelectRange(r)) {
         r = expandRange(r);
         switch(Action) {
-        case NUMBER: NumberRange(r); break;
-        case DELETE: DeleteRange(r); break;
+        case NUMBER:      NumberRange(r); break;
+        case DELETE:      DeleteRange(r); break;
         case INSERT:
-        case SWAP:     SaveRange(r); break;
+        case SWAP:          SaveRange(r); break;
         case IDS: break;
+        case ANNOTATOR:
+          llvm::errs() << "Error: VisitRange and ANNOTATOR are impossible";
+          break;
         }
         Counter++;
       }
@@ -180,7 +203,14 @@ namespace {
       case Stmt::UserDefinedLiteralClass:
         break;
       default:
-        VisitRange(s->getSourceRange());
+        if (Action == ANNOTATOR){
+          if (SelectRange(s->getSourceRange())){
+            AnnotateStmt(s);
+            Counter++;
+          }
+        } else {
+          VisitRange(s->getSourceRange());
+        }
       }
       return true;
     }
@@ -238,6 +268,10 @@ ASTConsumer *clang::CreateASTNumberer(){
 
 ASTConsumer *clang::CreateASTIDS(){
   return new ASTMutator(0, /*Dump=*/ true, IDS, -1, -1);
+}
+
+ASTConsumer *clang::CreateASTAnnotator(){
+  return new ASTMutator(0, /*Dump=*/ true, ANNOTATOR, -1, -1);
 }
 
 ASTConsumer *clang::CreateASTDeleter(int Stmt){

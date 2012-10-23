@@ -8,10 +8,11 @@
 
 namespace clang {  
 
-enum ACTION { NUMBER, IDS, DELETE, INSERT, SWAP };
+enum ACTION { NUMBER, IDS, ANNOTATOR, DELETE, INSERT, SWAP };
 
 ASTConsumer *CreateASTNumberer();
 ASTConsumer *CreateASTIDS();
+ASTConsumer *CreateASTAnnotator();
 ASTConsumer *CreateASTDeleter(int Stmt);
 ASTConsumer *CreateASTInserter(int Stmt1, int Stmt2);
 ASTConsumer *CreateASTSwapper(int Stmt1, int Stmt2);
