@@ -34,9 +34,11 @@ namespace {
   public:
     ASTMutator(raw_ostream *Out = NULL, bool Dump = false,
                ACTION Action = NUMBER,
-               int Stmt1 = -1, int Stmt2 = -1)
-      : Out(Out ? *Out : llvm::outs()), Dump(Dump), Action(Action),
-        Stmt1(Stmt1), Stmt2(Stmt2) {}
+               int Stmt1 = -1, int Stmt2 = -1,
+               StringRef Value = (StringRef)"")
+      : Out(Out ? *Out : llvm::outs()),
+        Dump(Dump), Action(Action), Stmt1(Stmt1), Stmt2(Stmt2),
+        Value(Value) {}
 
     virtual void HandleTranslationUnit(ASTContext &Context) {
       TranslationUnitDecl *D = Context.getTranslationUnitDecl();
@@ -109,6 +111,14 @@ namespace {
                                          Rewrite.getLangOpts());
 
       Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
+    }
+
+    void GetStmt(Stmt *s){
+      if (Counter == Stmt1) Out << Rewrite.ConvertToString(s) << "\n";
+    }
+
+    void SetRange(SourceRange r){
+      if (Counter == Stmt1) Rewrite.ReplaceText(r, Value);
     }
 
     void ListStmt(Stmt *s)
@@ -217,6 +227,8 @@ namespace {
           case LISTER:    ListStmt(s);     break;
           case NUMBER:    NumberRange(r);  break;
           case DELETE:    DeleteRange(r);  break;
+          case GET:       GetStmt(s);      break;
+          case SET:       SetRange(r);     break;
           case INSERT:
           case SWAP:      SaveRange(r);    break;
           case IDS:                        break;
@@ -255,7 +267,9 @@ namespace {
       // output rewritten source code or ID count
       switch(Action){
       case IDS: Out << Counter << "\n";
-      case LISTER: break;
+      case LISTER:
+      case GET:
+        break;
       default:
         const RewriteBuffer *RewriteBuf = 
           Rewrite.getRewriteBufferFor(Context.getSourceManager().getMainFileID());
@@ -268,6 +282,7 @@ namespace {
     bool Dump;
     ACTION Action;
     int Stmt1, Stmt2;
+    StringRef Value;
     unsigned int Counter;
     FileID mainFileID;
     SourceRange Range1, Range2;
@@ -276,23 +291,23 @@ namespace {
 }
 
 ASTConsumer *clang::CreateASTNumberer(){
-  return new ASTMutator(0, /*Dump=*/ true, NUMBER, -1, -1);
+  return new ASTMutator(0, /*Dump=*/ true, NUMBER);
 }
 
 ASTConsumer *clang::CreateASTIDS(){
-  return new ASTMutator(0, /*Dump=*/ true, IDS, -1, -1);
+  return new ASTMutator(0, /*Dump=*/ true, IDS);
 }
 
 ASTConsumer *clang::CreateASTAnnotator(){
-  return new ASTMutator(0, /*Dump=*/ true, ANNOTATOR, -1, -1);
+  return new ASTMutator(0, /*Dump=*/ true, ANNOTATOR);
 }
 
 ASTConsumer *clang::CreateASTLister(){
-  return new ASTMutator(0, /*Dump=*/ true, LISTER, -1, -1);
+  return new ASTMutator(0, /*Dump=*/ true, LISTER);
 }
 
 ASTConsumer *clang::CreateASTDeleter(int Stmt){
-  return new ASTMutator(0, /*Dump=*/ true, DELETE, Stmt, -1);
+  return new ASTMutator(0, /*Dump=*/ true, DELETE, Stmt);
 }
 
 ASTConsumer *clang::CreateASTInserter(int Stmt1, int Stmt2){
@@ -301,4 +316,12 @@ ASTConsumer *clang::CreateASTInserter(int Stmt1, int Stmt2){
 
 ASTConsumer *clang::CreateASTSwapper(int Stmt1, int Stmt2){
   return new ASTMutator(0, /*Dump=*/ true, SWAP, Stmt1, Stmt2);
+}
+
+ASTConsumer *clang::CreateASTGetter(int Stmt){
+  return new ASTMutator(0, /*Dump=*/ true, GET, Stmt);
+}
+
+ASTConsumer *clang::CreateASTSetter(int Stmt, StringRef Value){
+  return new ASTMutator(0, /*Dump=*/ true, SET, Stmt, -1, Value);
 }

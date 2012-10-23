@@ -50,8 +50,11 @@ static cl::opt<bool>     List("list",     cl::desc("list every statement's id, c
 static cl::opt<bool>   Delete("delete",   cl::desc("delete stmt1"));
 static cl::opt<bool>   Insert("insert",   cl::desc("copy stmt1 to after stmt2"));
 static cl::opt<bool>     Swap("swap",     cl::desc("Swap stmt1 and stmt2"));
+static cl::opt<bool>      Get("get",      cl::desc("Return the text of stmt1"));
+static cl::opt<bool>      Set("set",      cl::desc("Set the text of stmt1 to value"));
 static cl::opt<int>     Stmt1("stmt1",    cl::desc("statement 1 for mutation ops"));
 static cl::opt<int>     Stmt2("stmt2",    cl::desc("statement 2 for mutation ops"));
+static cl::opt<std::string> Value("value",cl::desc("string value for mutation ops"));
 
 namespace {
 class ActionFactory {
@@ -71,6 +74,10 @@ public:
       return clang::CreateASTInserter(Stmt1, Stmt2);
     if (Swap)
       return clang::CreateASTSwapper(Stmt1, Stmt2);
+    if (Get)
+      return clang::CreateASTGetter(Stmt1);
+    if (Set)
+      return clang::CreateASTSetter(Stmt1, Value);
     errs() << "Must supply one of [number,ids,delete,insert,swap].\n";
     exit(EXIT_FAILURE);
   }

@@ -9,6 +9,8 @@ This tool performs five operations on C-language source files.
 - delete   :: deletes that numbered statement
 - insert   :: copies the second numbered statement before the first
 - swap     :: swaps the two numbered statements
+- get      :: get the text of a stmt
+- set      :: set the text of a stmt
 
 For example:
 : $ cat hello.c
