@@ -5,6 +5,7 @@ This tool performs five operations on C-language source files.
 - ids      :: prints the total number of statements
 - number   :: numbers each statement
 - annotate :: annotate each statement with its class
+- lister   :: list every statement's id, class and range
 - delete   :: deletes that numbered statement
 - insert   :: copies the second numbered statement before the first
 - swap     :: swaps the two numbered statements

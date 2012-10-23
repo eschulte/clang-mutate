@@ -111,6 +111,25 @@ namespace {
       Rewrite.InsertText(END.getLocWithOffset(EndOff), label, true);
     }
 
+    void ListStmt(Stmt *s)
+    {
+      SourceManager &SM = Rewrite.getSourceMgr();
+      PresumedLoc PLoc;
+
+      Out << Counter
+          << " "
+          << s->getStmtClassName()
+          << " ";
+
+      PLoc = SM.getPresumedLoc(s->getSourceRange().getEnd());
+      Out << PLoc.getLine() << ":" << PLoc.getColumn() << " ";
+
+      PLoc = SM.getPresumedLoc(s->getSourceRange().getBegin());
+      Out << PLoc.getLine() << ":" << PLoc.getColumn() << " ";
+
+      Out << PLoc.getFilename() << "\n";
+    }
+
     void DeleteRange(SourceRange r)
     {
       char label[24];
@@ -169,23 +188,6 @@ namespace {
       return SourceRange(b,e);
     }
 
-    void VisitRange(SourceRange r){
-      if (SelectRange(r)) {
-        r = expandRange(r);
-        switch(Action) {
-        case NUMBER:      NumberRange(r); break;
-        case DELETE:      DeleteRange(r); break;
-        case INSERT:
-        case SWAP:          SaveRange(r); break;
-        case IDS: break;
-        case ANNOTATOR:
-          llvm::errs() << "Error: VisitRange and ANNOTATOR are impossible";
-          break;
-        }
-        Counter++;
-      }
-    }
-
     bool VisitStmt(Stmt *s){
       switch (s->getStmtClass()){
       case Stmt::NoStmtClass:
@@ -203,13 +205,18 @@ namespace {
       case Stmt::UserDefinedLiteralClass:
         break;
       default:
-        if (Action == ANNOTATOR){
-          if (SelectRange(s->getSourceRange())){
-            AnnotateStmt(s);
-            Counter++;
+        SourceRange r = expandRange(s->getSourceRange());
+        if(SelectRange(r)){
+          switch(Action){
+          case ANNOTATOR: AnnotateStmt(s); break;
+          case LISTER:    ListStmt(s);     break;
+          case NUMBER:    NumberRange(r);  break;
+          case DELETE:    DeleteRange(r);  break;
+          case INSERT:
+          case SWAP:      SaveRange(r);    break;
+          case IDS:                        break;
           }
-        } else {
-          VisitRange(s->getSourceRange());
+          Counter++;
         }
       }
       return true;
@@ -241,9 +248,10 @@ namespace {
 
     void OutputRewritten(ASTContext &Context) {
       // output rewritten source code or ID count
-      if(Action == IDS){
-        Out << Counter << "\n";
-      } else {
+      switch(Action){
+      case IDS: Out << Counter << "\n";
+      case LISTER: break;
+      default:
         const RewriteBuffer *RewriteBuf = 
           Rewrite.getRewriteBufferFor(Context.getSourceManager().getMainFileID());
         Out << std::string(RewriteBuf->begin(), RewriteBuf->end());
@@ -272,6 +280,10 @@ ASTConsumer *clang::CreateASTIDS(){
 
 ASTConsumer *clang::CreateASTAnnotator(){
   return new ASTMutator(0, /*Dump=*/ true, ANNOTATOR, -1, -1);
+}
+
+ASTConsumer *clang::CreateASTLister(){
+  return new ASTMutator(0, /*Dump=*/ true, LISTER, -1, -1);
 }
 
 ASTConsumer *clang::CreateASTDeleter(int Stmt){

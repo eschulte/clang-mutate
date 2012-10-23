@@ -46,6 +46,7 @@ static cl::extrahelp MoreHelp(
 static cl::opt<bool>   Number("number",   cl::desc("number all statements"));
 static cl::opt<bool>      Ids("ids",      cl::desc("print count of statement ids"));
 static cl::opt<bool> Annotate("annotate", cl::desc("annotate each statement with its class"));
+static cl::opt<bool>     List("list",     cl::desc("list every statement's id, class and range"));
 static cl::opt<bool>   Delete("delete",   cl::desc("delete stmt1"));
 static cl::opt<bool>   Insert("insert",   cl::desc("copy stmt1 to after stmt2"));
 static cl::opt<bool>     Swap("swap",     cl::desc("Swap stmt1 and stmt2"));
@@ -62,6 +63,8 @@ public:
       return clang::CreateASTIDS();
     if (Annotate)
       return clang::CreateASTAnnotator();
+    if (List)
+      return clang::CreateASTLister();
     if (Delete)
       return clang::CreateASTDeleter(Stmt1);
     if (Insert)
