@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# Usage: strings-to file string
+# change all string literals in FILE to STRING
+#
+FILE="$(cat "$1")"
+STR="$2"
+TMP="/tmp/clang_mutate_script_${RANDOM}.c"
+
+for ID in $(clang-mutate -list $1 --|grep StringLiteral|awk '{print $1}');do
+    echo "$FILE" > $TMP
+    FILE="$(clang-mutate -set -stmt1=$ID -value="\"$STR\"" $TMP --|tail -n +2)"
+done
+
+rm $TMP
+echo "$FILE"
