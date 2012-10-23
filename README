@@ -19,7 +19,7 @@ when copied to the same directory as the clang executable.  Running
 
 For example,
 
-    $ cat hello.c
+    $ cat etc/hello.c
     #include <stdio.h>
     int main(int argc, char *argv[])
     {
@@ -27,11 +27,11 @@ For example,
       return 0;
     }
 
-    $ clang-mutate -ids hello.c --
+    $ clang-mutate -ids etc/hello.c --
     Processing: hello.c.
     8
 
-    $ clang-mutate -number hello.c --
+    $ clang-mutate -number etc/hello.c --
     Processing: hello.c.
     /* numbered using clang-mutate */
     #include <stdio.h>
@@ -41,7 +41,7 @@ For example,
       /* 6[ */return /* 7[ */0/* ]6 *//* ]7 */;
     }/* ]0 */
 
-    $ clang-mutate -delete -stmt1=6 hello.c --
+    $ clang-mutate -delete -stmt1=6 etc/hello.c --
     Processing: hello.c.
     /* deleted 6 using clang-mutate */
     #include <stdio.h>
@@ -51,7 +51,7 @@ For example,
       /* deleted:6 */;
     }
 
-    $ clang-mutate -set -stmt1=4 -value="'good bye'" hello.c --
+    $ clang-mutate -set -stmt1=4 -value="'good bye'" etc/hello.c --
     Processing: /home/eschulte/src/clang-mutate/hello.c.
     #include <stdio.h>
     int main(int argc, char *argv[])

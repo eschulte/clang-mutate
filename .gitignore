@@ -4,8 +4,6 @@ mutate
 mutate2
 clang-mutate
 compile_commands.json
-hello
-hello-no-include
 *_num.c
 *_del.c
 *_ins.c
