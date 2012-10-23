@@ -1,54 +1,63 @@
-Manipulate C-family ASTs with Clang                        -*- org -*-
+Manipulate C-family ASTs with Clang
 
-This tool performs five operations on C-language source files.
+This tool performs a number of operations on C-language source files.
 
-- ids      :: prints the total number of statements
-- number   :: numbers each statement
-- annotate :: annotate each statement with its class
-- list     :: list every statement's id, class and range
-- delete   :: deletes that numbered statement
-- insert   :: copies the second numbered statement before the first
-- swap     :: swaps the two numbered statements
-- get      :: get the text of a stmt
-- set      :: set the text of a stmt
+      ids | prints the total number of statements
+   number | numbers each statement
+ annotate | annotate each statement with its class
+     list | list every statement's id, class and range
+   delete | deletes that numbered statement
+   insert | copies the second numbered statement before the first
+     swap | swaps the two numbered statements
+      get | get the text of a stmt
+      set | set the text of a stmt
 
-For example:
-: $ cat hello.c
-: #include <stdio.h>
-: int main(int argc, char *argv[])
-: {
-:   puts("hello");
-:   return 0;
-: }
-: 
-: $ clang-mutate -ids hello.c --
-: Processing: hello.c.
-: 8
-: 
-: $ clang-mutate -number hello.c --
-: Processing: hello.c.
-: /* numbered using clang-mutate */
-: #include <stdio.h>
-: int main(int argc, char *argv[])
-: /* 0[ */{
-:   /* 3[ *//* 2[ *//* 1[ */puts/* ]2 *//* ]3 */(/* 5[ *//* 4[ */"hello"/* ]4 *//* ]5 */)/* ]1 */;
-:   /* 6[ */return /* 7[ */0/* ]6 *//* ]7 */;
-: }/* ]0 */
-: 
-: $ clang-mutate -delete -stmt1=6 hello.c --
-: Processing: hello.c.
-: /* deleted 6 using clang-mutate */
-: #include <stdio.h>
-: int main(int argc, char *argv[])
-: {
-:   puts("hello");
-:   /* deleted:6 */;
-: }
+Run "make install" to install.  This uses the clang LibTooling [1]
+interface, which means that the clang-mutate executable works best
+when copied to the same directory as the clang executable.  Running
+"make install" will do this for you.
 
-Run `make' to compile the clang-mutate executable.  This uses the
-clang LibTooling [1] interface, which means that the clang-mutate
-executable works best when the executable is copied to the same
-directory as the clang executable.  Running "make install" will do
-this for you.
+For example,
+
+    $ cat hello.c
+    #include <stdio.h>
+    int main(int argc, char *argv[])
+    {
+      puts("hello");
+      return 0;
+    }
+
+    $ clang-mutate -ids hello.c --
+    Processing: hello.c.
+    8
+
+    $ clang-mutate -number hello.c --
+    Processing: hello.c.
+    /* numbered using clang-mutate */
+    #include <stdio.h>
+    int main(int argc, char *argv[])
+    /* 0[ */{
+      /* 3[ *//* 2[ *//* 1[ */puts/* ]2 *//* ]3 */(/* 5[ *//* 4[ */"hello"/* ]4 *//* ]5 */)/* ]1 */;
+      /* 6[ */return /* 7[ */0/* ]6 *//* ]7 */;
+    }/* ]0 */
+
+    $ clang-mutate -delete -stmt1=6 hello.c --
+    Processing: hello.c.
+    /* deleted 6 using clang-mutate */
+    #include <stdio.h>
+    int main(int argc, char *argv[])
+    {
+      puts("hello");
+      /* deleted:6 */;
+    }
+
+    $ clang-mutate -set -stmt1=4 -value="'good bye'" hello.c --
+    Processing: /home/eschulte/src/clang-mutate/hello.c.
+    #include <stdio.h>
+    int main(int argc, char *argv[])
+    {
+      puts('good bye');
+      return 0;
+    }
 
 [1] http://clang.llvm.org/docs/LibTooling.html
