@@ -95,7 +95,7 @@ namespace {
     {
       char label[128];
       unsigned EndOff;
-      SourceRange r = s->getSourceRange();
+      SourceRange r = expandRange(s->getSourceRange());
       SourceLocation END = r.getEnd();
 
       sprintf(label, "/* %d:%s[ */", Counter, s->getStmtClassName());
