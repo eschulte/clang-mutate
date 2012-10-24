@@ -52,8 +52,8 @@ static cl::opt<bool>   Insert("insert",   cl::desc("copy stmt1 to after stmt2"))
 static cl::opt<bool>     Swap("swap",     cl::desc("Swap stmt1 and stmt2"));
 static cl::opt<bool>      Get("get",      cl::desc("Return the text of stmt1"));
 static cl::opt<bool>      Set("set",      cl::desc("Set the text of stmt1 to value"));
-static cl::opt<int>     Stmt1("stmt1",    cl::desc("statement 1 for mutation ops"));
-static cl::opt<int>     Stmt2("stmt2",    cl::desc("statement 2 for mutation ops"));
+static cl::opt<unsigned int>     Stmt1("stmt1",    cl::desc("statement 1 for mutation ops"));
+static cl::opt<unsigned int>     Stmt2("stmt2",    cl::desc("statement 2 for mutation ops"));
 static cl::opt<std::string> Value("value",cl::desc("string value for mutation ops"));
 
 namespace {

@@ -32,12 +32,12 @@ namespace {
     typedef RecursiveASTVisitor<ASTMutator> base;
 
   public:
-    ASTMutator(raw_ostream *Out = NULL, bool Dump = false,
+    ASTMutator(raw_ostream *Out = NULL,
                ACTION Action = NUMBER,
-               int Stmt1 = -1, int Stmt2 = -1,
+               unsigned int Stmt1 = 0, unsigned int Stmt2 = 0,
                StringRef Value = (StringRef)"")
       : Out(Out ? *Out : llvm::outs()),
-        Dump(Dump), Action(Action), Stmt1(Stmt1), Stmt2(Stmt2),
+        Action(Action), Stmt1(Stmt1), Stmt2(Stmt2),
         Value(Value) {}
 
     virtual void HandleTranslationUnit(ASTContext &Context) {
@@ -267,9 +267,8 @@ namespace {
     
   private:
     raw_ostream &Out;
-    bool Dump;
     ACTION Action;
-    int Stmt1, Stmt2;
+    unsigned int Stmt1, Stmt2;
     StringRef Value;
     unsigned int Counter;
     FileID mainFileID;
@@ -279,37 +278,37 @@ namespace {
 }
 
 ASTConsumer *clang::CreateASTNumberer(){
-  return new ASTMutator(0, /*Dump=*/ true, NUMBER);
+  return new ASTMutator(0, NUMBER);
 }
 
 ASTConsumer *clang::CreateASTIDS(){
-  return new ASTMutator(0, /*Dump=*/ true, IDS);
+  return new ASTMutator(0, IDS);
 }
 
 ASTConsumer *clang::CreateASTAnnotator(){
-  return new ASTMutator(0, /*Dump=*/ true, ANNOTATOR);
+  return new ASTMutator(0, ANNOTATOR);
 }
 
 ASTConsumer *clang::CreateASTLister(){
-  return new ASTMutator(0, /*Dump=*/ true, LISTER);
+  return new ASTMutator(0, LISTER);
 }
 
-ASTConsumer *clang::CreateASTDeleter(int Stmt){
-  return new ASTMutator(0, /*Dump=*/ true, DELETE, Stmt);
+ASTConsumer *clang::CreateASTDeleter(unsigned int Stmt){
+  return new ASTMutator(0, DELETE, Stmt);
 }
 
-ASTConsumer *clang::CreateASTInserter(int Stmt1, int Stmt2){
-  return new ASTMutator(0, /*Dump=*/ true, INSERT, Stmt1, Stmt2);
+ASTConsumer *clang::CreateASTInserter(unsigned int Stmt1, unsigned int Stmt2){
+  return new ASTMutator(0, INSERT, Stmt1, Stmt2);
 }
 
-ASTConsumer *clang::CreateASTSwapper(int Stmt1, int Stmt2){
-  return new ASTMutator(0, /*Dump=*/ true, SWAP, Stmt1, Stmt2);
+ASTConsumer *clang::CreateASTSwapper(unsigned int Stmt1, unsigned int Stmt2){
+  return new ASTMutator(0, SWAP, Stmt1, Stmt2);
 }
 
-ASTConsumer *clang::CreateASTGetter(int Stmt){
-  return new ASTMutator(0, /*Dump=*/ true, GET, Stmt);
+ASTConsumer *clang::CreateASTGetter(unsigned int Stmt){
+  return new ASTMutator(0, GET, Stmt);
 }
 
-ASTConsumer *clang::CreateASTSetter(int Stmt, StringRef Value){
-  return new ASTMutator(0, /*Dump=*/ true, SET, Stmt, -1, Value);
+ASTConsumer *clang::CreateASTSetter(unsigned int Stmt, StringRef Value){
+  return new ASTMutator(0, SET, Stmt, -1, Value);
 }

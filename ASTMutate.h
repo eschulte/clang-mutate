@@ -14,11 +14,11 @@ ASTConsumer *CreateASTNumberer();
 ASTConsumer *CreateASTIDS();
 ASTConsumer *CreateASTAnnotator();
 ASTConsumer *CreateASTLister();
-ASTConsumer *CreateASTDeleter(int Stmt);
-ASTConsumer *CreateASTInserter(int Stmt1, int Stmt2);
-ASTConsumer *CreateASTSwapper(int Stmt1, int Stmt2);
-ASTConsumer *CreateASTGetter(int Stmt);
-ASTConsumer *CreateASTSetter(int Stmt, StringRef Value);
+ASTConsumer *CreateASTDeleter(unsigned int Stmt);
+ASTConsumer *CreateASTInserter(unsigned int Stmt1, unsigned int Stmt2);
+ASTConsumer *CreateASTSwapper(unsigned int Stmt1, unsigned int Stmt2);
+ASTConsumer *CreateASTGetter(unsigned int Stmt);
+ASTConsumer *CreateASTSetter(unsigned int Stmt, StringRef Value);
 
 }
 
