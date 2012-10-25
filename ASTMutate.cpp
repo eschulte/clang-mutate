@@ -121,6 +121,10 @@ namespace {
       if (Counter == Stmt1) Rewrite.ReplaceText(r, Value);
     }
 
+    void InsertRange(SourceRange r){
+      if (Counter == Stmt1) Rewrite.InsertText(r.getBegin(), Value, false);
+    }
+
     void ListStmt(Stmt *s)
     {
       char label[9];
@@ -217,6 +221,7 @@ namespace {
           case DELETE:    DeleteRange(r);  break;
           case GET:       GetStmt(s);      break;
           case SET:       SetRange(r);     break;
+          case VALUEINSERT: InsertRange(r); break;
           case INSERT:
           case SWAP:      SaveRange(r);    break;
           case IDS:                        break;
@@ -311,4 +316,8 @@ ASTConsumer *clang::CreateASTGetter(unsigned int Stmt){
 
 ASTConsumer *clang::CreateASTSetter(unsigned int Stmt, StringRef Value){
   return new ASTMutator(0, SET, Stmt, -1, Value);
+}
+
+ASTConsumer *clang::CreateASTValueInserter(unsigned int Stmt, StringRef Value){
+  return new ASTMutator(0, VALUEINSERT, Stmt, -1, Value);
 }

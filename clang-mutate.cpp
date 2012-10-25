@@ -37,24 +37,26 @@ static cl::extrahelp MoreHelp(
     "\n"
     "\t  ./clang-mutate -ids file.c\n"
     "\n"
-    "\tor to delete the statement with ID=12, use:\n"
+    "\tto delete the statement with ID=12, use:\n"
     "\n"
     "\t  ./clang-mutate -delete -stmt1=12 file.c\n"
     "\n"
 );
 
-static cl::opt<bool>   Number("number",   cl::desc("number all statements"));
-static cl::opt<bool>      Ids("ids",      cl::desc("print count of statement ids"));
-static cl::opt<bool> Annotate("annotate", cl::desc("annotate each statement with its class"));
-static cl::opt<bool>     List("list",     cl::desc("list every statement's id, class and range"));
-static cl::opt<bool>   Delete("delete",   cl::desc("delete stmt1"));
-static cl::opt<bool>   Insert("insert",   cl::desc("copy stmt1 to after stmt2"));
-static cl::opt<bool>     Swap("swap",     cl::desc("Swap stmt1 and stmt2"));
-static cl::opt<bool>      Get("get",      cl::desc("Return the text of stmt1"));
-static cl::opt<bool>      Set("set",      cl::desc("Set the text of stmt1 to value"));
-static cl::opt<unsigned int>     Stmt1("stmt1",    cl::desc("statement 1 for mutation ops"));
-static cl::opt<unsigned int>     Stmt2("stmt2",    cl::desc("statement 2 for mutation ops"));
-static cl::opt<std::string> Value("value",cl::desc("string value for mutation ops"));
+static cl::opt<bool>        Number ("number",       cl::desc("number all statements"));
+static cl::opt<bool>           Ids ("ids",          cl::desc("print count of statement ids"));
+static cl::opt<bool>      Annotate ("annotate",     cl::desc("annotate each statement with its class"));
+static cl::opt<bool>          List ("list",         cl::desc("list every statement's id, class and range"));
+static cl::opt<bool>        Delete ("delete",       cl::desc("delete stmt1"));
+static cl::opt<bool>        Insert ("insert",       cl::desc("copy stmt1 to after stmt2"));
+static cl::opt<bool>          Swap ("swap",         cl::desc("Swap stmt1 and stmt2"));
+static cl::opt<bool>           Get ("get",          cl::desc("Return the text of stmt1"));
+static cl::opt<bool>           Set ("set",          cl::desc("Set the text of stmt1 to value"));
+static cl::opt<bool>   InsertValue ("insert-value", cl::desc("insert value before stmt1"));
+static cl::opt<unsigned int> Stmt1 ("stmt1",        cl::desc("statement 1 for mutation ops"));
+static cl::opt<unsigned int> Stmt2 ("stmt2",        cl::desc("statement 2 for mutation ops"));
+static cl::opt<std::string>  Value ("value",        cl::desc("string value for mutation ops"));
+static cl::opt<std::string>  Stmts ("stmts",        cl::desc("string of space-separated statement ids"));
 
 namespace {
 class ActionFactory {
@@ -78,7 +80,19 @@ public:
       return clang::CreateASTGetter(Stmt1);
     if (Set)
       return clang::CreateASTSetter(Stmt1, Value);
-    errs() << "Must supply one of [number,ids,delete,insert,swap].\n";
+    if (InsertValue)
+      return clang::CreateASTValueInserter(Stmt1, Value);
+    errs() << "Must supply one of;";
+    errs() << "\tnumber\n";
+    errs() << "\tids\n";
+    errs() << "\tannotate\n";
+    errs() << "\tlist\n";
+    errs() << "\tdelete\n";
+    errs() << "\tinsert\n";
+    errs() << "\tswap\n";
+    errs() << "\tget\n";
+    errs() << "\tset\n";
+    errs() << "\tinsert-value\n";
     exit(EXIT_FAILURE);
   }
 };
@@ -89,5 +103,6 @@ int main(int argc, const char **argv) {
   CommonOptionsParser OptionsParser(argc, argv);
   ClangTool Tool(OptionsParser.GetCompilations(),
                  OptionsParser.GetSourcePathList());
+  outs() << Stmts << "\n";
   return Tool.run(newFrontendActionFactory(&Factory));
 }
