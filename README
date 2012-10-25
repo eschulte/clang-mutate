@@ -12,14 +12,19 @@ This tool performs a number of operations on C-language source files.
       get | get the text of a stmt
       set | set the text of a stmt
 
-Run "make install" to install.  This uses the clang LibTooling [1]
-interface, which means that the clang-mutate executable works best
-when copied to the same directory as the clang executable.  Running
-"make install" will do this for you.
+Installation
 
-[1] http://clang.llvm.org/docs/LibTooling.html
+  clang-mutate uses the clang LibTooling [1] interface.  Thus the
+  clang-mutate executable works best when run from the same directory
+  as clang.  Run "make install" to build and install.
 
-For example,
+  On Arch Linux, aur scripts are provided in aur/ which may be used to
+  install both llvm/clang with header files and clang-mutate.  Known
+  working versions are listed in the aur PKGBUILD files and in NOTES.
+
+  [1] http://clang.llvm.org/docs/LibTooling.html
+
+Examples
 
     $ cat etc/hello.c
     #include <stdio.h>
@@ -60,7 +65,7 @@ For example,
       return 0;
     }
 
-or we can remove loop executions using tools/perforate-loops script,
+  remove loop executions using the tools/perforate-loops script
 
     $ make etc/loop
     cc     etc/loop.c   -o etc/loop
@@ -85,7 +90,7 @@ or we can remove loop executions using tools/perforate-loops script,
     hello 6
     hello 8
 
-or replace string literals using tools/strings-to.
+  replace string literals using tools/strings-to
 
     $ ./tools/strings-to etc/hello.c foo
     #include <stdio.h>
