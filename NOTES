@@ -11,6 +11,16 @@ http://clang.llvm.org/docs/RAVFrontendAction.html
 Clang tools depend on the existence of Compilation Databases.
 http://clang.llvm.org/docs/JSONCompilationDatabase.html
 
+* Known working versions
+Compiles and builds successfully using the PKGBUILD files in aur/ with
+svn revision 166623 of llvm/clang and with git version 2a21af23 of
+this repository.
+
+| program      | version             |
+|--------------+---------------------|
+| llvm/clang   | svn revision 166623 |
+| clang-mutate | git hash 2a21af23   |
+
 * Notes Issues and Tasks [3/5]
 ** TODO better selection of AST nodes to visit [1/3]
 - what can we visit http://clang.llvm.org/docs/RAVFrontendAction.html
@@ -210,61 +220,6 @@ both =/* 2[ */= and =/* 3[ */=.
 :   /* 3[ *//* 2[ *//* 1[ */puts/* ]2 *//* ]3 */(/* 5[ *//* 4[ */"hello"/* ]4 *//* ]5 */)/* ]1 */;
 :   /* 6[ */return /* 7[ */0/* ]6 *//* ]7 */;
 : }/* ]0 */
-
-** known working versions of LLVM and Clang
-LLVM
-: Path: .
-: Working Copy Root Path: /usr/local/src/llvm
-: URL: http://llvm.org/svn/llvm-project/llvm/trunk
-: Repository Root: http://llvm.org/svn/llvm-project
-: Repository UUID: 91177308-0d34-0410-b5e6-96231b3b80d8
-: Revision: 163018
-: Node Kind: directory
-: Schedule: normal
-: Last Changed Author: hliao
-: Last Changed Rev: 163018
-: Last Changed Date: 2012-08-31 14:12:31 -0600 (Fri, 31 Aug 2012)
-
-Clang
-: Path: .
-: Working Copy Root Path: /usr/local/src/llvm/tools/clang
-: URL: http://llvm.org/svn/llvm-project/cfe/trunk
-: Repository Root: http://llvm.org/svn/llvm-project
-: Repository UUID: 91177308-0d34-0410-b5e6-96231b3b80d8
-: Revision: 163034
-: Node Kind: directory
-: Schedule: normal
-: Last Changed Author: lattner
-: Last Changed Rev: 163034
-: Last Changed Date: 2012-08-31 16:39:21 -0600 (Fri, 31 Aug 2012)
-
-Using the latest version of Clang on Arch Linux I get [[http://donttreadonme.co.uk/rubinius/2012/10/02.html][this error]],
-which is fixed by [[http://sourceware.org/git/?p=glibc.git;a=blobdiff;f=misc/sys/cdefs.h;h=fb6c959d903474b38fd0fcc36e17c5290dcd867c;hp=b94147efe8c5bbba718cb2f9d5911a92414864b6;hb=b7bfe116;hpb=43c4edba7ee8224134132fb38df5f63895cbb326][this commit]] to glibc which unfortunately is not yet
-in Arch.
-
-*** after rebuilding clang getting the following
-: clang++ -I/usr/include -march=x86-64 -mtune=generic -O2 -pipe -fstack-protector --param=ssp-buffer-size=4 -D_FORTIFY_SOURCE=2 -fno-tree-pre -fno-tree-pre  -fPIC -fvisibility-inlines-hidden -O3 -DNDEBUG  -D_GNU_SOURCE -Wall -W -Wno-unused-parameter -Wwrite-strings -pedantic -Wno-long-long -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -fno-rtti   -c -o clang-mutate.o clang-mutate.cpp
-: clang-3: warning: argument unused during compilation: '-fno-tree-pre'
-: clang-3: warning: argument unused during compilation: '-fno-tree-pre'
-: In file included from clang-mutate.cpp:15:
-: In file included from ./ASTMutate.h:7:
-: In file included from /usr/include/clang/AST/ASTContext.h:18:
-: In file included from /usr/include/clang/Basic/IdentifierTable.h:22:
-: In file included from /usr/include/llvm/ADT/StringMap.h:17:
-: In file included from /usr/include/llvm/ADT/StringRef.h:15:
-: In file included from /usr/lib/gcc/x86_64-unknown-linux-gnu/4.7.2/../../../../include/c++/4.7.2/algorithm:62:
-: In file included from /usr/lib/gcc/x86_64-unknown-linux-gnu/4.7.2/../../../../include/c++/4.7.2/bits/stl_algo.h:61:
-: In file included from /usr/lib/gcc/x86_64-unknown-linux-gnu/4.7.2/../../../../include/c++/4.7.2/cstdlib:65:
-: In file included from /usr/include/stdlib.h:957:
-: /usr/include/bits/stdlib.h:36:1: error: unknown type name '__extern_always_inline'
-: __fortify_function __wur char *
-: ^
-: /usr/include/sys/cdefs.h:143:28: note: expanded from macro '__fortify_function'
-: #define __fortify_function __extern_always_inline __attribute_artificial__
-
-*** patch to PKGBUILD
-I made this change to allow building with more recent versions of gcc, any reason not to apply it?
-http://sprunge.us/ZeAf
 
 ** DONE member access into incomplete type
 : $ make mutate-tool
