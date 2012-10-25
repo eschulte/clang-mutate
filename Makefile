@@ -1,8 +1,7 @@
 CXX := clang++
-LLVMCOMPONENTS := cppbackend
 RTTIFLAG := -fno-rtti
 CXXFLAGS := $(shell llvm-config --cxxflags) $(RTTIFLAG)
-LLVMLDFLAGS := $(shell llvm-config --ldflags --libs $(LLVMCOMPONENTS))
+LLVMLDFLAGS := $(shell llvm-config --ldflags --libs)
 
 SOURCES = clang-mutate.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
@@ -19,8 +18,7 @@ CLANGLIBS = \
 	-lclangAST \
 	-lclangLex \
 	-lclangBasic \
-	-lclangRewrite \
-	-lLLVM-3.2svn
+	-lclangRewrite
 
 all: $(OBJECTS) $(EXES)
 .PHONY: clean install
