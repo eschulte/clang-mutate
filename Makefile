@@ -18,7 +18,8 @@ CLANGLIBS = \
 	-lclangAST \
 	-lclangLex \
 	-lclangBasic \
-	-lclangRewrite
+	-lclangRewriteCore \
+	-lclangRewriteFrontend
 
 all: $(OBJECTS) $(EXES)
 .PHONY: clean install
