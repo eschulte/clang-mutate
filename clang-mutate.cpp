@@ -4,12 +4,12 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  This file implements a mutation tool that runs the
-//  clang::MutateAction over a number of translation units.
+//  This file implements a mutation tool that runs a number of
+//  mutation actions defined in ASTMutate.cpp over C language source
+//  code files.
 //
 //  This tool uses the Clang Tooling infrastructure, see
-//    http://clang.llvm.org/docs/HowToSetupToolingForLLVM.html
-//  for details on setting it up with LLVM source tree.
+//  http://clang.llvm.org/docs/LibTooling.html for details.
 //
 //===----------------------------------------------------------------------===//
 #include "ASTMutate.h"
