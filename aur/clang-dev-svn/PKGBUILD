@@ -68,7 +68,7 @@ build() {
   msg2 "Starting build..."
 
   cd $_svnmod
-  ./configure --prefix=/usr
+  ./configure --prefix=/usr CC=gcc CXX=g++
   _make_w_python2
 }
 
