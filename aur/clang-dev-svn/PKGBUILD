@@ -1,8 +1,12 @@
 # adapted by Eric Schulte from clang-svn         -*- shell-script -*-
 #
+# Like clang-svn but includes all of the headers etc... you'll need if
+# you want to compile tools built upon clang.
+#
 # differences are:
 # - simpler build
 # - fuller build
+# - installs headers
 # - installs clang-tools-extra
 # - builds with make rather than cmake
 # - pollutes source directory (but who cares)
@@ -19,7 +23,7 @@
 # Contributor: Roberto Alsina <ralsina@kde.org>
 # Contributor: Gerardo Exequiel Pozzi <vmlinuz386@yahoo.com.ar>
 
-pkgname=clang-dev
+pkgname=clang-dev-svn
 pkgver=166623
 pkgrel=1
 pkgdesc="Low Level Virtual Machine with Clang from SVN"
@@ -30,12 +34,6 @@ depends=('gcc-libs' 'libffi' 'python2' "gcc>=4.7.0")
 makedepends=('svn')
 provides=('clang' 'llvm')
 conflicts=(llvm llvm-svn llvm-ocaml clang clang-svn clang-analyzer)
-source=()
-md5sums=('02c23b4aaca3445b8bf39fddb2f9906e'
-         '87a7162dbe99e9ffce6c40bd09f5f4f0'
-         '225ee6b531f8327f34f344a18cb4ec81'
-         '8f7582d7440e4a8342c3aea9ec714fb4'
-         '9d153103dda0c088562f1feb1129b67e')
 
 _svnmod="llvm"
 
