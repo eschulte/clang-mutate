@@ -1,13 +1,13 @@
 # -*- shell-script -*-
 # Maintainer: Eric Schulte <schulte.eric@gmail.com>
 pkgname=clang-mutate-git
-pkgver=20121025
+pkgver=20121030
 pkgrel=1
 pkgdesc="Manipulate C-family ASTs with Clang"
 arch=('i686' 'x86_64')
 url="https://github.com/eschulte/clang-mutate"
 license=('GPL3')
-makedepends=('git' 'clang-dev')
+makedepends=('git' 'clang-dev-svn')
 provides=('clang-mutate')
 
 _gitroot="git://github.com/eschulte/clang-mutate.git"
