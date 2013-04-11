@@ -6,7 +6,7 @@ This tool performs a number of operations on C-language source files.
    number | numbers each statement
  annotate | annotate each statement with its class
      list | list every statement's id, class and range
-   delete | deletes that numbered statement
+      cut | cuts that numbered statement
    insert | copies the second numbered statement before the first
      swap | swaps the two numbered statements
       get | get the text of a stmt
@@ -47,13 +47,13 @@ Examples
       /* 7[ */return /* 8[ */0;/* ]7 *//* ]8 */
     }/* ]0 */
 
-    $ clang-mutate -delete -stmt1=7 etc/hello.c --
+    $ clang-mutate -cut -stmt1=7 etc/hello.c --
     Processing: hello.c.
     #include <stdio.h>
     int main(int argc, char *argv[])
     {
       puts("hello");
-      /* deleted:7 */;
+      /* cut:7 */;
     }
 
     $ clang-mutate -set -stmt1=5 -value='"good bye"' etc/hello.c --

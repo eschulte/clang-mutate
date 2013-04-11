@@ -37,9 +37,9 @@ static cl::extrahelp MoreHelp(
     "\n"
     "\t  ./clang-mutate -ids file.c\n"
     "\n"
-    "\tto delete the statement with ID=12, use:\n"
+    "\tto cut the statement with ID=12, use:\n"
     "\n"
-    "\t  ./clang-mutate -delete -stmt1=12 file.c\n"
+    "\t  ./clang-mutate -cut -stmt1=12 file.c\n"
     "\n"
 );
 
@@ -47,7 +47,7 @@ static cl::opt<bool>        Number ("number",       cl::desc("number all stateme
 static cl::opt<bool>           Ids ("ids",          cl::desc("print count of statement ids"));
 static cl::opt<bool>      Annotate ("annotate",     cl::desc("annotate each statement with its class"));
 static cl::opt<bool>          List ("list",         cl::desc("list every statement's id, class and range"));
-static cl::opt<bool>        Delete ("delete",       cl::desc("delete stmt1"));
+static cl::opt<bool>           Cut ("cut",          cl::desc("cut stmt1"));
 static cl::opt<bool>        Insert ("insert",       cl::desc("copy stmt1 to after stmt2"));
 static cl::opt<bool>          Swap ("swap",         cl::desc("Swap stmt1 and stmt2"));
 static cl::opt<bool>           Get ("get",          cl::desc("Return the text of stmt1"));
@@ -70,8 +70,8 @@ public:
       return clang::CreateASTAnnotator();
     if (List)
       return clang::CreateASTLister();
-    if (Delete)
-      return clang::CreateASTDeleter(Stmt1);
+    if (Cut)
+      return clang::CreateASTCuter(Stmt1);
     if (Insert)
       return clang::CreateASTInserter(Stmt1, Stmt2);
     if (Swap)
@@ -87,7 +87,7 @@ public:
     errs() << "\tids\n";
     errs() << "\tannotate\n";
     errs() << "\tlist\n";
-    errs() << "\tdelete\n";
+    errs() << "\tcut\n";
     errs() << "\tinsert\n";
     errs() << "\tswap\n";
     errs() << "\tget\n";

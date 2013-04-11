@@ -149,11 +149,11 @@ namespace {
       Out << s->getStmtClassName() << "\n";
     }
 
-    void DeleteRange(SourceRange r)
+    void CutRange(SourceRange r)
     {
       char label[24];
       if(Counter == Stmt1) {
-        sprintf(label, "/* deleted:%d */", Counter);
+        sprintf(label, "/* cut:%d */", Counter);
         Rewrite.ReplaceText(r, label);
       }
     }
@@ -218,7 +218,7 @@ namespace {
           case ANNOTATOR: AnnotateStmt(s); break;
           case LISTER:    ListStmt(s);     break;
           case NUMBER:    NumberRange(r);  break;
-          case DELETE:    DeleteRange(r);  break;
+          case CUT:       CutRange(r);     break;
           case GET:       GetStmt(s);      break;
           case SET:       SetRange(r);     break;
           case VALUEINSERT: InsertRange(r); break;
@@ -298,8 +298,8 @@ ASTConsumer *clang::CreateASTLister(){
   return new ASTMutator(0, LISTER);
 }
 
-ASTConsumer *clang::CreateASTDeleter(unsigned int Stmt){
-  return new ASTMutator(0, DELETE, Stmt);
+ASTConsumer *clang::CreateASTCuter(unsigned int Stmt){
+  return new ASTMutator(0, CUT, Stmt);
 }
 
 ASTConsumer *clang::CreateASTInserter(unsigned int Stmt1, unsigned int Stmt2){
