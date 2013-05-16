@@ -101,8 +101,8 @@ public:
 int main(int argc, const char **argv) {
   ActionFactory Factory;
   CommonOptionsParser OptionsParser(argc, argv);
-  ClangTool Tool(OptionsParser.GetCompilations(),
-                 OptionsParser.GetSourcePathList());
+  ClangTool Tool(OptionsParser.getCompilations(),
+                 OptionsParser.getSourcePathList());
   outs() << Stmts << "\n";
   return Tool.run(newFrontendActionFactory(&Factory));
 }

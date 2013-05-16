@@ -1,7 +1,7 @@
 CXX := clang++
 RTTIFLAG := -fno-rtti
 CXXFLAGS := $(shell llvm-config --cxxflags) $(RTTIFLAG)
-LLVMLDFLAGS := $(shell llvm-config --ldflags --libs)
+LLVMLDFLAGS := $(shell llvm-config --ldflags --libs) -ldl
 
 SOURCES = clang-mutate.cpp
 OBJECTS = $(SOURCES:.cpp=.o)

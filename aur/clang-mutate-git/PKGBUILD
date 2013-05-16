@@ -7,7 +7,7 @@ pkgdesc="Manipulate C-family ASTs with Clang"
 arch=('i686' 'x86_64')
 url="https://github.com/eschulte/clang-mutate"
 license=('GPL3')
-makedepends=('git' 'clang-dev-svn')
+makedepends=('git' 'llvm-clang-cmake-svn')
 provides=('clang-mutate')
 
 _gitroot="git://github.com/eschulte/clang-mutate.git"

@@ -13,13 +13,11 @@ http://clang.llvm.org/docs/JSONCompilationDatabase.html
 
 * Known working versions
 Compiles and builds successfully using the PKGBUILD files in aur/ with
-svn revision 166623 of llvm/clang and with git version 2a21af23 of
-this repository.
+svn revision 182049 (the latest as of this writing) of llvm/clang.
 
-| program      | version             |
-|--------------+---------------------|
-| llvm/clang   | svn revision 166623 |
-| clang-mutate | git hash 2a21af23   |
+| program    | version             |
+|------------+---------------------|
+| llvm/clang | svn revision 182049 |
 
 * Notes Issues and Tasks [3/5]
 ** TODO better selection of AST nodes to visit [1/3]
